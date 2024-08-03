@@ -1,0 +1,10 @@
+#ifndef CONFIG_AT24C_CONF_H_
+#define CONFIG_AT24C_CONF_H_
+
+#define AT24C_HANDLE hi2c1
+#define AT24C_ADDRESS 0xA0
+
+#define AT24C_PAGE_SIZE  64
+#define AT24C_PAGE_COUNT 512
+
+#endif
