@@ -1,15 +1,10 @@
 #ifndef INC_GPS_H_
 #define INC_GPS_H_
 
+#include "gps_conf.h"
+
 #include "stdint.h"
 #include "main.h"
-
-#define GPS_HANDLE huart3
-#define GPS_DMA_HANDLE hdma_usart3_rx
-#define GPS_INT_PIN PPS_Pin
-
-#define GPS_RX_BUF_SIZE 1000
-#define GPS_TX_BUF_SIZE 1000
 
 void Gps_Init(void);
 void Gps_Update(void);

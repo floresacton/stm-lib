@@ -1,13 +1,10 @@
 #ifndef INC_LPS22HH_H_
 #define INC_LPS22HH_H_
 
+#include "lps22hh_conf.h"
+
 #include "stdint.h"
 
-//max spi speed 10MHz
-#define LPS22HH_HANDLE hspi1
-#define LPS22HH_INT_PIN DRDYP_Pin
-
-#define LPS22HH_COUNT 1
 #define LPS22HH_DATA_SIZE 5
 
 #define LPS22HH_ADDRESS 0xBA
@@ -56,10 +53,6 @@
 
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_L 0x7B //r
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_H 0x7C //r
-
-enum Lps22hhId {
-	Lps22hh1,
-};
 
 void Lps22hh_Init(void);
 

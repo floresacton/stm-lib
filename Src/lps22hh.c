@@ -7,7 +7,7 @@ extern SPI_HandleTypeDef LPS22HH_HANDLE;
 static GPIO_TypeDef *chipSelectPorts[LPS22HH_COUNT] = { CSP_GPIO_Port};
 static uint16_t chipSelectsPins[LPS22HH_COUNT] = { CSP_Pin };
 
-static uint8_t data[LPS22HH_COUNT][LPS22HH_DATA_SIZE] = {0};
+static uint8_t data[LPS22HH_COUNT*LPS22HH_DATA_SIZE] = {0};
 static uint32_t* pressures[LPS22HH_COUNT];
 static int16_t* temperatures[LPS22HH_COUNT];
 
@@ -44,8 +44,8 @@ void Lps22hh_Init(void) {
 		if (lps22hh_read_register(i, LPS22HH_REG_WHO_AM_I) != LPS22HH_ID) {
 			Error_Handler();
 		}
-		pressures[i] = (uint32_t*)data[i];
-		temperatures[i] = (int16_t*)data[i]+3;
+		pressures[i] = (uint32_t*)(data+i*LPS22HH_DATA_SIZE);
+		temperatures[i] = (int16_t*)(data+i*LPS22HH_DATA_SIZE+3);
 
 		//configure ODR 200hz
 		//enable low pass filter at bandwidth odr/9
@@ -62,7 +62,7 @@ uint8_t Lps22hh_ExtFlag(uint16_t pin) {
 
 void Lps22hh_ExtHandler(void) {
 	for (uint8_t i = 0; i < LPS22HH_COUNT; i++) {
-		lps22hh_read_registers(i, LPS22HH_REG_PRESS_XL, data[i], LPS22HH_DATA_SIZE);
+		lps22hh_read_registers(i, LPS22HH_REG_PRESS_XL, data+i*LPS22HH_DATA_SIZE, LPS22HH_DATA_SIZE);
 	}
 }
 

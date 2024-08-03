@@ -6,12 +6,6 @@
 extern TIM_HandleTypeDef TACH_REF_HANDLE;
 extern TIM_HandleTypeDef TACH_CALC_HANDLE;
 
-extern COMP_HandleTypeDef hcomp1;
-extern COMP_HandleTypeDef hcomp2;
-extern COMP_HandleTypeDef hcomp3;
-
-static COMP_HandleTypeDef* comps[TACH_COUNT] = {&hcomp2, &hcomp1, &hcomp3};
-
 static volatile uint32_t count[TACH_COUNT] = {0};
 
 static volatile uint32_t countAccum[TACH_COUNT] = {0};
@@ -24,10 +18,6 @@ static uint16_t rpm[TACH_COUNT] = {0};
 
 
 void Tach_Init(void) {
-	for (uint8_t i = 0; i < TACH_COUNT; i++) {
-		HAL_COMP_Start(comps[i]);
-	}
-
 	HAL_TIM_Base_Start_IT(&TACH_REF_HANDLE);
 	HAL_TIM_Base_Start_IT(&TACH_CALC_HANDLE);
 }
@@ -68,11 +58,7 @@ void Tach_TimHandlerRef(void) {
 	count[2]++;
 }
 
-uint8_t Tach_CompFlag(enum TachId tach, COMP_HandleTypeDef* hcomp) {
-	return comps[tach] == hcomp;
-}
-
-void Tach_CompHandler(enum TachId tach) {
+void Tach_Trigger(enum TachId tach) {
 	if (count[tach] >= 60.0*(float)TACH_REF_FREQ/(Memory_ReadByte(MemTach1Spokes+tach)*Memory_ReadShort(MemTach1Max+tach))) {
 		passes[tach]++;
 		countAccum[tach]+=count[tach];
@@ -83,7 +69,6 @@ void Tach_CompHandler(enum TachId tach) {
 		count[tach] = 0;
 	}
 }
-
 
 uint16_t Tach_Rpm(uint8_t chan) {
 	return rpm[chan];

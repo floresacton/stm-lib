@@ -1,11 +1,15 @@
-#include <button.h>
+#include "button.h"
 #include "main.h"
 
 extern TIM_HandleTypeDef BUTTON_HANDLE;
 
-static GPIO_TypeDef *ports[BUTTON_COUNT] = { BTN1_GPIO_Port, BTN2_GPIO_Port,
-		BTN3_GPIO_Port, BTN4_GPIO_Port };
-static uint16_t pins[BUTTON_COUNT] = { BTN1_Pin, BTN2_Pin, BTN3_Pin, BTN4_Pin };
+#define T(btn) btn##_GPIO_Port,
+static GPIO_TypeDef *ports[BUTTON_COUNT] = { BUTTON_LIST };
+#undef T
+
+#define T(btn) btn##_Pin,
+static uint16_t pins[BUTTON_COUNT] = { BUTTON_LIST };
+#undef T
 
 static uint8_t lastState[BUTTON_COUNT];
 static uint8_t pressed[BUTTON_COUNT];

@@ -1,21 +1,10 @@
 #ifndef INC_BUTTON_H_
 #define INC_BUTTON_H_
 
+#include "button_conf.h"
+
 #include "stdint.h"
 #include "main.h"
-
-#define BUTTON_COUNT 4
-
-#define BUTTON_HANDLE htim3 //50hz
-
-#include "inttypes.h"
-
-enum ButtonId {
-	ButtonUp,
-	ButtonDown,
-	ButtonEnter,
-	ButtonBack,
-};
 
 void Button_Init(void);
 

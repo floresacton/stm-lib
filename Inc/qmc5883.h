@@ -1,11 +1,9 @@
 #ifndef INC_QMC5883_H_
 #define INC_QMC5883_H_
 
+#include "qmc5883_conf.h"
+
 #include "stdint.h"
-
-
-#define QMC5883_HANDLE hi2c2 //400khz max
-#define QMC5883_INT_PIN DRDYM_Pin
 
 #define QMC5883_ADDRESS 0x1A
 #define QMC5883_ID 0xFF

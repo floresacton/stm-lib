@@ -1,17 +1,10 @@
 #ifndef INC_ICM42688_H_
 #define INC_ICM42688_H_
 
+#include "icm42688_conf.h"
+
 #include "stdint.h"
 #include "main.h"
-
-#define ICM42688_SPI_HANDLE hspi1 //24Mhz max
-#define ICM42688_INT_PIN INTG_Pin
-
-//ensure no overflow
-#define ICM42688_REF_HANDLE htim4
-#define ICM42688_REF_FREQ 16000000
-
-#define ICM42688_CALC_FREQ 500
 
 //bank 0
 #define ICM42688_REG_DEVICE_CONFIG 0x11 //r-w
