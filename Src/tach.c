@@ -1,75 +1,64 @@
 #include "tach.h"
-#include "stm32g4xx_hal.h"
-#include "memory.h"
-#include "dac.h"
+#include "stdlib.h"
+#include "main.h"
 
-extern TIM_HandleTypeDef TACH_REF_HANDLE;
-extern TIM_HandleTypeDef TACH_CALC_HANDLE;
+void Tach_Init(struct Tach_Handle* handle) {
+	handle->rpm = malloc(handle->channelCount * 2);
 
-static volatile uint32_t count[TACH_COUNT] = {0};
+	handle->count = malloc(handle->channelCount * 4);
+	handle->countAccum = malloc(handle->channelCount * 4);
+	handle->passes = malloc(handle->channelCount * 4);
 
-static volatile uint32_t countAccum[TACH_COUNT] = {0};
-static volatile uint32_t passes[TACH_COUNT] = {0};
-
-static volatile uint32_t checkpointAccum[TACH_COUNT] = {0};
-static volatile uint32_t checkpointPasses[TACH_COUNT] = {0};
-
-static uint16_t rpm[TACH_COUNT] = {0};
-
-
-void Tach_Init(void) {
-	HAL_TIM_Base_Start_IT(&TACH_REF_HANDLE);
-	HAL_TIM_Base_Start_IT(&TACH_CALC_HANDLE);
+	handle->checkpointAccum = malloc(handle->channelCount * 4);
+	handle->checkpointPasses = malloc(handle->channelCount * 4);
 }
 
-uint8_t Tach_TimFlagCalc(TIM_HandleTypeDef* htim) {
-	return htim == &TACH_CALC_HANDLE;
+uint8_t Tach_TimFlagCalc(struct Tach_Handle* handle, TIM_HandleTypeDef* htim) {
+	return handle->htimCalc == htim;
 }
-
-void Tach_TimHandlerCalc(void) {
-	for (uint8_t i = 0; i < TACH_COUNT; i++) {
-		if (checkpointPasses[i]) {
-			rpm[i] = (float)TACH_REF_FREQ*60.0*(float)checkpointPasses[i]/((float)checkpointAccum[i]*(float)Memory_ReadByte(MemTach1Spokes+i));
-			countAccum[i] = 0;
-			checkpointAccum[i] = 0;
-		}else if(passes[i]){
-			rpm[i] = (float)TACH_REF_FREQ*60.0*(float)passes[i]/((float)countAccum[i]*(float)Memory_ReadByte(MemTach1Spokes+i));
-			countAccum[i] = 0;
-			checkpointAccum[i] = 0;
+void Tach_TimHandlerCalc(struct Tach_Handle* handle) {
+	for (uint8_t i = 0; i < handle->channelCount; i++) {
+		if (handle->checkpointPasses[i]) {
+			handle->rpm[i] = (float)handle->freqRef*60.0*(float)handle->checkpointPasses[i]/((float)handle->checkpointAccum[i]*(float)handle->spokes[i]);
+			handle->countAccum[i] = 0;
+			handle->checkpointAccum[i] = 0;
+		}else if(handle->passes[i]){
+			handle->rpm[i] = (float)handle->freqRef*60.0*(float)handle->passes[i]/((float)handle->countAccum[i]*(float)handle->spokes[i]);
+			handle->countAccum[i] = 0;
+			handle->checkpointAccum[i] = 0;
 		}else {
-			const uint16_t new_rpm = (float)TACH_REF_FREQ*60.0/((float)Memory_ReadByte(MemTach1Spokes+i)*(float)count[i]);
-			if (new_rpm < rpm[i]) {
-				rpm[i] = new_rpm;
+			const uint16_t new_rpm = (float)handle->freqRef*60.0/((float)handle->spokes[i]*(float)handle->count[i]);
+			if (new_rpm < handle->rpm[i]) {
+				handle->rpm[i] = new_rpm;
 			}
 		}
 
-		passes[i] = 0;
-		checkpointPasses[i] = 0;
+		handle->passes[i] = 0;
+		handle->checkpointPasses[i] = 0;
 	}
 }
 
-uint8_t Tach_TimFlagRef(TIM_HandleTypeDef* htim) {
-	return htim == &TACH_REF_HANDLE;
+uint8_t Tach_TimFlagCount(struct Tach_Handle* handle, TIM_HandleTypeDef* htim) {
+	return handle->htimCount == htim;
+}
+void Tach_TimHandlerCount(struct Tach_Handle* handle) {
+	for (uint8_t i = 0; i < handle->channelCount; i++) {
+		handle->count[i]++;
+	}
 }
 
-void Tach_TimHandlerRef(void) {
-	count[0]++;
-	count[1]++;
-	count[2]++;
-}
-
-void Tach_Trigger(enum TachId tach) {
-	if (count[tach] >= 60.0*(float)TACH_REF_FREQ/(Memory_ReadByte(MemTach1Spokes+tach)*Memory_ReadShort(MemTach1Max+tach))) {
-		passes[tach]++;
-		countAccum[tach]+=count[tach];
-		if (passes[tach] % Memory_ReadByte(MemTach1Spokes+tach) == 0) {
-			checkpointPasses[tach] = passes[tach];
-			checkpointAccum[tach] = countAccum[tach];
+void Tach_Trigger(struct Tach_Handle* handle, uint8_t chan) {
+	if (handle->count[chan] >= 60.0*(float)handle->freqRef/(handle->spokes[chan]*handle->maxRpm[chan])) {
+		handle->passes[chan]++;
+		handle->countAccum[chan] += handle->count[chan];
+		if (handle->passes[chan] % handle->spokes[chan] == 0) {
+			handle->checkpointPasses[chan] = handle->passes[chan];
+			handle->checkpointAccum[chan] = handle->countAccum[chan];
 		}
-		count[tach] = 0;
+		handle->count[chan] = 0;
 	}
 }
 
-uint16_t Tach_Rpm(uint8_t chan) {
-	return rpm[chan];
+uint16_t Tach_Rpm(struct Tach_Handle* handle, uint8_t chan) {
+	return handle->rpm[chan];
 }

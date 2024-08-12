@@ -1,69 +1,57 @@
-#include <at24c.h>
 #include "memory.h"
+#include "eeprom.h"
 #include "stm32g4xx_hal.h"
 #include "stdlib.h"
 
-static uint8_t mem_buf[MEMORY_SIZE];
+void Memory_Init(struct Memory_Handle* handle) {
+	handle->bufSize = 1 + handle->byteCount + 2 * handle->shortCount + 4 * (handle->intCount + handle->floatCount);
+	handle->buf = malloc(handle->bufSize);
 
-void Memory_Init(void) {
-	At24c_Read(0, mem_buf, MEMORY_SIZE);
-	if (Memory_ReadByte(MemHash) != MEMORY_HASH) {
-		Memory_WriteByte(MemHash, MEMORY_HASH);
-		Memory_Reset();
+	handle->byteStart = handle->buf + 1;
+	handle->shortStart = handle->byteStart + handle->byteCount;
+	handle->intStart = handle->shortStart + 2 * handle->shortCount;
+	handle->floatStart = handle->intStart + 4 * handle->intCount;
+
+	Eeprom_Read(handle->eeprom, 0, handle->buf, handle->bufSize);
+	if (Eeprom_ReadByte(handle->eeprom, 0) != handle->hash) {
+		Eeprom_WriteByte(handle->eeprom, 0, handle->hash);
+		Memory_Reset(handle);
 	}
 }
 
-void Memory_Reset(void) {
-	#define T(name, reset) Memory_WriteByte(Mem##name, reset);
-	MEMORY_BYTE_LIST
-	#undef T
-	#define T(name, reset) Memory_WriteShort(Mem##name, reset);
-	MEMORY_SHORT_LIST
-	#undef T
-	#define T(name, reset) Memory_WriteInt(Mem##name, reset);
-	MEMORY_INT_LIST
-	#undef T
-	#define T(name, reset) Memory_WriteFloat(Mem##name, reset);
-	MEMORY_FLOAT_LIST
-	#undef T
+__weak void Memory_Reset(struct Memory_Handle* handle) {
 }
 
-uint8_t Memory_ReadByte(uint8_t loc) {
-	return mem_buf[loc - 1];
+uint8_t Memory_ReadByte(struct Memory_Handle* handle, uint8_t loc) {
+	return handle->byteStart[loc];
 }
-uint16_t Memory_ReadShort(uint8_t loc) {
-	const uint16_t pos = MEMORY_BYTES + 2 * (loc - 1);
-	return *((uint16_t*) (mem_buf + pos));
+uint16_t Memory_ReadShort(struct Memory_Handle* handle, uint8_t loc) {
+	return ((uint16_t*)handle->shortStart)[loc];
 }
-uint32_t Memory_ReadInt(uint8_t loc) {
-	const uint16_t pos = MEMORY_BYTES + 2 * MEMORY_SHORTS + 4 * (loc - 1);
-	return *((uint32_t*) (mem_buf + pos));
+uint32_t Memory_ReadInt(struct Memory_Handle* handle, uint8_t loc) {
+	return ((uint32_t*)handle->intStart)[loc];
 }
-float Memory_ReadFloat(uint8_t loc) {
-	const uint16_t pos = MEMORY_BYTES + 2 * MEMORY_SHORTS + 4 * MEMORY_INTS + 4 * (loc - 1);
-	return *((float*) (mem_buf + pos));
+float Memory_ReadFloat(struct Memory_Handle* handle, uint8_t loc) {
+	return ((float*)handle->floatStart)[loc];
 }
 
-void Memory_WriteByte(uint8_t loc, uint8_t val) {
-	const uint16_t pos = loc -1;
-	mem_buf[pos] = val;
-	At24c_Write(pos, &val, 1);
+void Memory_WriteByte(struct Memory_Handle* handle, uint8_t loc, uint8_t val) {
+	uint8_t* pos = handle->byteStart + loc;
+	*pos = val;
+	Eeprom_Write(handle->eeprom, pos-handle->buf, &val, 1);
 }
-void Memory_WriteShort(uint8_t loc, uint16_t val) {
-	const uint16_t pos = MEMORY_BYTES + 2 * (loc - 1);
-	uint16_t *ptr = (uint16_t*) (mem_buf + pos);
-	ptr[0] = val;
-	At24c_Write(pos, (uint8_t*) &val, 2);
+void Memory_WriteShort(struct Memory_Handle* handle, uint8_t loc, uint16_t val) {
+	uint16_t* pos = (uint16_t*)handle->shortStart + loc;
+	*pos = val;
+	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
 }
-void Memory_WriteInt(uint8_t loc, uint32_t val) {
-	const uint16_t pos = MEMORY_BYTES + 2 * MEMORY_SHORTS + 4 * (loc - 1);
-	uint32_t *ptr = (uint32_t*) (mem_buf + pos);
-	ptr[0] = val;
-	At24c_Write(pos, (uint8_t*) &val, 2);
+void Memory_WriteInt(struct Memory_Handle* handle, uint8_t loc, uint32_t val) {
+	uint32_t* pos = (uint32_t*)handle->intStart + loc;
+	*pos = val;
+	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
 }
-void Memory_WriteFloat(uint8_t loc, float val) {
-	const uint16_t pos = MEMORY_BYTES + 2 * MEMORY_SHORTS + 4 * MEMORY_INTS + 4 * (loc - 1);
-	float *ptr = (float*) (mem_buf + pos);
-	ptr[0] = val;
-	At24c_Write(pos, (uint8_t*) &val, 4);
+void Memory_WriteFloat(struct Memory_Handle* handle, uint8_t loc, float val) {
+	float* pos = (float*)handle->floatStart + loc;
+	*pos = val;
+	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
 }

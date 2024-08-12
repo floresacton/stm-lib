@@ -4,11 +4,12 @@
 #include "main.h"
 
 struct Gpio_Handle {
+	// configuration
     GPIO_TypeDef* port;
     uint16_t pin;
 };
 
-void Gpio_Write(Gpio_Handle* gpio, uint8_t state);
-uint8_t Gpio_Read(Gpio_Handle* gpio);
+void Gpio_Write(struct Gpio_Handle* handle, uint8_t state);
+uint8_t Gpio_Read(struct Gpio_Handle* handle);
 
 #endif

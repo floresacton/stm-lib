@@ -1,29 +1,27 @@
 #ifndef INC_AT24C_H_
 #define INC_AT24C_H_
 
-// #define AT24C_HANDLE hi2c1
-// #define AT24C_ADDRESS 0xA0
-
-// #define AT24C_PAGE_SIZE  64
-// #define AT24C_PAGE_COUNT 512
-
 #include "stdint.h"
 #include "main.h"
 
 struct Eeprom_Handle {
-    I2C_HandleTypeDef hi2c;
+	// configuration
+    I2C_HandleTypeDef* hi2c;
     uint8_t address;
 
     uint8_t pageSize;
     uint16_t pageCount;
 };
 
+void Eeprom_Read(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len);
+uint8_t Eeprom_ReadByte(struct Eeprom_Handle* handle, uint16_t address);
+
 //wrap page
-void Eeprom_Write(Eeprom_Handle* eeprom, uint16_t address, uint8_t *buf, uint16_t len);
+void Eeprom_Write(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len);
+void Eeprom_WriteByte(struct Eeprom_Handle* handle, uint16_t address, uint8_t val);
 
 //wrap memory
-void Eeprom_ReadNext(Eeprom_Handle* eeprom, uint8_t *buf, uint8_t len);
+void Eeprom_ReadNext(struct Eeprom_Handle* handle, uint8_t *buf, uint8_t len);
 
-void Eeprom_Read(Eeprom_Handle* eeprom, uint16_t address, uint8_t *buf, uint16_t len);
 
 #endif

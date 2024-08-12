@@ -9,7 +9,7 @@
 struct Font {
 	const uint16_t width;
 	const uint16_t height;
-	const uint8_t scale;//width (bytes)
+	const uint8_t scale; // width (bytes)
 	const uint8_t *data;
 };
 

@@ -6,32 +6,31 @@
 #define NMEA_BUF_SIZE 90
 #define NMEA_MIN_LENGTH 5
 
-struct Time {
+struct Nmea_Handle {
+	// internal
+	uint8_t fix;
+	uint8_t satCount;
+
 	uint8_t hour;
-	uint8_t min;
+	uint8_t minute;
 	float second;
 
-	uint8_t day;
-	uint8_t month;
 	uint8_t year;
-};
+	uint8_t month;
+	uint8_t day;
 
-struct Position {
 	float latitude;
 	char latHem;
 	float longitude;
 	char lonHem;
 	float altitude;
+
+	float speed;
 };
 
-void Nmea_Parse(char* data);
-void Nmea_Timepulse(void);
+void Nmea_Init(struct Nmea_Handle* handle);
 
-float Nmea_Speed(void);
-
-uint8_t Nmea_Satellites(void);
-
-struct Time* Nmea_Time(void);
-struct Position* Nmea_Position(void);
+void Nmea_Parse(struct Nmea_Handle* handle, char* msg);
+void Nmea_Timepulse(struct Nmea_Handle* handle);
 
 #endif

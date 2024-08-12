@@ -6,18 +6,22 @@
 #include "gpio.h"
 
 struct Button_Handle {
-    TIM_HandleTypeDef* htim; // 50Hz typ
+	// configuration
+    TIM_HandleTypeDef* htim; // 50Hz typical
 
-    Gpio_Handle* buttonPins;
+    struct Gpio_Handle* buttonPins;
     uint8_t buttonCount;
+
+    // internal
+    uint8_t* lastState;
+    uint8_t* pressed;
 };
 
-void Button_Init(Button_Handle* button);
+void Button_Init(struct Button_Handle* handle);
 
-uint8_t Button_Pressed(Button_Handle* button, uint8_t button);
+uint8_t Button_GetPressed(struct Button_Handle* handle, uint8_t button);
 
-void Button_TimHandler(Button_Handle* button);
-uint8_t Button_TimFlag(Button_Handle* button, TIM_HandleTypeDef *htim);
-
+void Button_TimHandler(struct Button_Handle* handle);
+uint8_t Button_TimFlag(struct Button_Handle* handle, TIM_HandleTypeDef *htim);
 
 #endif

@@ -167,15 +167,16 @@
 // #define ICM42688_CALC_FREQ 500
 
 struct Icm42688_Handle {
+	// configuration
     SPI_HandleTypeDef* hspi;//24Mhz max
-    Gpio_Handle* intPin;
+    uint16_t intPin;
 
-    TIM_HandleTypeDef htim;
+    TIM_HandleTypeDef* htim;
 };
 
-void Icm42688_Init(Icm42688_Handle* icm);
+void Icm42688_Init(struct Icm42688_Handle* handle);
 
-uint8_t Icm42688_ExtFlag(Icm42688_Handle* icm, uint16_t pin);
-void Icm42688_ExtHandler(Icm42688_Handle* icm);
+uint8_t Icm42688_ExtFlag(struct Icm42688_Handle* handle, uint16_t pin);
+void Icm42688_ExtHandler(struct Icm42688_Handle* handle);
 
 #endif

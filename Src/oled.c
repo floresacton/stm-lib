@@ -1,219 +1,218 @@
 #include "oled.h"
-#include "stm32g4xx_hal.h"
 #include "string.h"
+#include "main.h"
+#include "gpio.h"
 
+void Oled_Reset(struct Oled_Handle* handle) {
+	if (handle->mode == Oled_Spi) {
+		Gpio_Write(handle->csPin, 1);
 
-static uint8_t oled_buffer[OLED_BUFFER_SIZE] = { 0 };
-static uint16_t cursorX = 0;
-static uint16_t cursorY = 0;
-
-#ifdef OLED_I2C
-extern I2C_HandleTypeDef OLED_HANDLE;
-
-void Oled_Reset(void) {
-	//do nothing
-}
-
-void Oled_WriteCommand(uint8_t byte) {
-	HAL_I2C_Mem_Write(&OLED_HANDLE, OLED_ADDRESS, 0x00, 1, &byte, 1,
-	HAL_MAX_DELAY);
-}
-
-void Oled_WriteData(uint8_t *buffer, size_t buff_size) {
-	HAL_I2C_Mem_Write(&OLED_HANDLE, OLED_ADDRESS, 0x40, 1, buffer, buff_size,
-	HAL_MAX_DELAY);
-}
-
-#elif defined(OLED_SPI)
-extern SPI_HandleTypeDef OLED_HANDLE;
-
-void Oled_Reset(void) {
-	HAL_GPIO_WritePin(OLED_CS_PORT, OLED_CS_PIN, 1);
-
-	// Reset the OLED
-#ifdef OLED_RES_PORT
-	    HAL_GPIO_WritePin(OLED_RES_PORT, OLED_RES_PIN, 0);
-	    HAL_Delay(10);
-	    HAL_GPIO_WritePin(OLED_RES_PORT, OLED_RES_PIN, 1);
-	    HAL_Delay(10);
-#endif
-}
-
-void Oled_WriteCommand(uint8_t byte) {
-	HAL_GPIO_WritePin(OLED_CS_PORT, OLED_CS_PIN, 0);
-	HAL_GPIO_WritePin(OLED_DC_PORT, OLED_DC_PIN, 0); // command
-	HAL_SPI_Transmit(&OLED_HANDLE, (uint8_t *) &byte, 1, HAL_MAX_DELAY);
-	HAL_GPIO_WritePin(OLED_CS_PORT, OLED_CS_PIN, 1);
-}
-
-void Oled_WriteData(uint8_t *buf, uint32_t len) {
-	HAL_GPIO_WritePin(OLED_CS_PORT, OLED_CS_PIN, 0);
-	HAL_GPIO_WritePin(OLED_DC_PORT, OLED_DC_PIN, 1); // data
-	HAL_SPI_Transmit(&OLED_HANDLE, buf, len, HAL_MAX_DELAY);
-	HAL_GPIO_WritePin(OLED_CS_PORT, OLED_CS_PIN, 1);
-}
-
-#endif
-
-void Oled_FillBuffer(uint8_t *buf, uint32_t len) {
-	if (len <= OLED_BUFFER_SIZE) {
-		memcpy(oled_buffer, buf, len);
+		Gpio_Write(handle->rsPin, 0);
+		HAL_Delay(10);
+		Gpio_Write(handle->rsPin, 1);
+		HAL_Delay(10);
 	}
 }
 
-void Oled_Init(void) {
-	Oled_Reset();
-	HAL_Delay(100);
-	Oled_SetPower(0);
+void Oled_WriteCommand(struct Oled_Handle* handle, uint8_t command) {
+	if (handle->mode == Oled_Spi) {
+		Gpio_Write(handle->csPin, 0);
+		Gpio_Write(handle->dcPin, 0); // command
+		HAL_SPI_Transmit(handle->hspi, &command, 1, HAL_MAX_DELAY);
+		Gpio_Write(handle->csPin, 1);
+	}else if (handle->mode == Oled_I2c) {
+		HAL_I2C_Mem_Write(handle->hi2c, handle->address, 0x00, 1, &command, 1, HAL_MAX_DELAY);
+	}
+}
 
-    Oled_WriteCommand(0x20); //Set Memory Addressing Mode
-    Oled_WriteCommand(0x00); // 00b,Horizontal Addressing Mode; 01b,Vertical Addressing Mode;
+void Oled_WriteData(struct Oled_Handle* handle, uint8_t *buf, uint32_t len) {
+	if (handle->mode == Oled_Spi) {
+		Gpio_Write(handle->csPin, 0);
+		Gpio_Write(handle->dcPin, 1); // command
+		HAL_SPI_Transmit(handle->hspi, buf, len, HAL_MAX_DELAY);
+		Gpio_Write(handle->csPin, 1);
+	}else if (handle->mode == Oled_I2c) {
+		HAL_I2C_Mem_Write(handle->hi2c, handle->address, 0x40, 1, buf, len, HAL_MAX_DELAY);
+	}
+}
+
+void Oled_WriteBuffer(struct Oled_Handle* handle, uint8_t *buf, uint32_t len) {
+	if (len <= handle->bufSize) {
+		memcpy(handle->buf, buf, len);
+	}
+}
+
+void Oled_Init(struct Oled_Handle* handle) {
+	handle->bufSize = handle->width*handle->height;
+	handle->buf = malloc(handle->bufSize);
+
+	handle->offsetLower = handle->offset & 0x0F;
+	handle->offsetUpper = (handle->offset >> 4) & 0x07;
+
+	handle->cursorX = 0;
+	handle->cursorY = 0;
+
+	Oled_Reset(handle);
+	HAL_Delay(100);
+	Oled_SetPower(handle, 0);
+
+    Oled_WriteCommand(handle, 0x20); //Set Memory Addressing Mode
+    Oled_WriteCommand(handle, 0x00); // 00b,Horizontal Addressing Mode; 01b,Vertical Addressing Mode;
                                 // 10b,Page Addressing Mode (RESET); 11b,Invalid
 
-    Oled_WriteCommand(0xB0); //Set Page Start Address for Page Addressing Mode,0-7
+    Oled_WriteCommand(handle, 0xB0); //Set Page Start Address for Page Addressing Mode,0-7
 
-#ifdef OLED_MIRROR_VERT
-    Oled_WriteCommand(0xC0); // Mirror vertically
-#else
-    Oled_WriteCommand(0xC8); //Set COM Output Scan Direction
-#endif
+    if (handle->mirrorVertical) {
+        Oled_WriteCommand(handle, 0xC0); // Mirror vertically
+    }else{
+        Oled_WriteCommand(handle, 0xC8); //Set COM Output Scan Direction
+    }
 
-    Oled_WriteCommand(0x00); //---set low column address
-    Oled_WriteCommand(0x10); //---set high column address
+    Oled_WriteCommand(handle, 0x00); //---set low column address
+    Oled_WriteCommand(handle, 0x10); //---set high column address
 
-    Oled_WriteCommand(0x40); //--set start line address - CHECK
+    Oled_WriteCommand(handle, 0x40); //--set start line address - CHECK
 
-    Oled_SetContrast(0xFF);
+    Oled_SetContrast(handle, 0xFF);
 
-#ifdef OLED_MIRROR_HORIZ
-    Oled_WriteCommand(0xA0); // Mirror horizontally
-#else
-    Oled_WriteCommand(0xA1); //--set segment re-map 0 to 127 - CHECK
-#endif
+    if (handle->mirrorHorizontal) {
+        Oled_WriteCommand(handle, 0xA0); // Mirror horizontally
+    }else{
+        Oled_WriteCommand(handle, 0xA1); //--set segment re-map 0 to 127 - CHECK
+    }
 
-#ifdef OLED_INVERT_COLOR
-    Oled_WriteCommand(0xA7); //--set inverse color
-#else
-    Oled_WriteCommand(0xA6); //--set normal color
-#endif
+    if (handle->invertColor) {
+        Oled_WriteCommand(handle, 0xA7); //--set inverse color
+    }else{
+        Oled_WriteCommand(handle, 0xA6); //--set normal color
+    }
 
-// Set multiplex ratio.
-#if (OLED_HEIGHT == 128)
+    // Set multiplex ratio.
     // Found in the Luma Python lib for SH1106.
-    Oled_WriteCommand(0xFF);
-#else
-    Oled_WriteCommand(0xA8); //--set multiplex ratio(1 to 64) - CHECK
-#endif
+    if (handle->height == 128) {
+        Oled_WriteCommand(handle, 0xFF);
+    }else{
+        Oled_WriteCommand(handle, 0xA8); //--set multiplex ratio(1 to 64) - CHECK
+    }
 
-#if (OLED_HEIGHT == 32)
-    Oled_WriteCommand(0x1F); //
-#elif (OLED_HEIGHT == 64)
-    Oled_WriteCommand(0x3F); //
-#elif (OLED_HEIGHT == 128)
-    Oled_WriteCommand(0x3F); // Seems to work for 128px high displays too.
-#else
-#error "Only 32, 64, or 128 lines of height are supported!"
-#endif
+    if (handle->height == 32) {
+    	Oled_WriteCommand(handle, 0x1F); //
+    }else if (handle->height == 64) {
+    	Oled_WriteCommand(handle, 0x3F); //
+    }else if (handle->height == 128) {
+    	Oled_WriteCommand(handle, 0x3F); // Seems to work for 128px high displays too.
+    }else{
+    	Error_Handler(); // Only 32, 64, or 128 lines of height are supported
+    }
 
-    Oled_WriteCommand(0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
+    Oled_WriteCommand(handle, 0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
 
-    Oled_WriteCommand(0xD3); //-set display offset - CHECK
-    Oled_WriteCommand(0x00); //-not offset
+    Oled_WriteCommand(handle, 0xD3); //-set display offset - CHECK
+    Oled_WriteCommand(handle, 0x00); //-not offset
 
-    Oled_WriteCommand(0xD5); //--set display clock divide ratio/oscillator frequency
-    Oled_WriteCommand(0xF0); //--set divide ratio
+    Oled_WriteCommand(handle, 0xD5); //--set display clock divide ratio/oscillator frequency
+    Oled_WriteCommand(handle, 0xF0); //--set divide ratio
 
-    Oled_WriteCommand(0xD9); //--set pre-charge period
-    Oled_WriteCommand(0x22); //
+    Oled_WriteCommand(handle, 0xD9); //--set pre-charge period
+    Oled_WriteCommand(handle, 0x22); //
 
-    Oled_WriteCommand(0xDA); //--set com pins hardware configuration - CHECK
-#if (OLED_HEIGHT == 32)
-    Oled_WriteCommand(0x02);
-#elif (OLED_HEIGHT == 64)
-    Oled_WriteCommand(0x12);
-#elif (OLED_HEIGHT == 128)
-    Oled_WriteCommand(0x12);
-#else
-#error "Only 32, 64, or 128 lines of height are supported!"
-#endif
+    Oled_WriteCommand(handle, 0xDA); //--set com pins hardware configuration - CHECK
 
-    Oled_WriteCommand(0xDB); //--set vcomh
-    Oled_WriteCommand(0x20); //0x20,0.77xVcc
+    if (handle->height == 32) {
+        Oled_WriteCommand(handle, 0x02);
+	}else if (handle->height == 64) {
+	    Oled_WriteCommand(handle, 0x12);
+	}else if (handle->height == 128) {
+	    Oled_WriteCommand(handle, 0x12);
+	}else{
+		Error_Handler(); // Only 32, 64, or 128 lines of height are supported
+	}
 
-    Oled_WriteCommand(0x8D); //--set DC-DC enable
-    Oled_WriteCommand(0x14); //
-    Oled_SetPower(1); //--turn on SSD1306 panel
+    Oled_WriteCommand(handle, 0xDB); //--set vcomh
+    Oled_WriteCommand(handle, 0x20); //0x20,0.77xVcc
 
-    Oled_Fill(OledBlack);
+    Oled_WriteCommand(handle, 0x8D); //--set DC-DC enable
+    Oled_WriteCommand(handle, 0x14); //
+    Oled_SetPower(handle, 1); //--turn on SSD1306 panel
+
+    Oled_Fill(handle, Oled_Black);
 }
 
-void Oled_Update(void) {
-	for(uint8_t i = 0; i < OLED_HEIGHT/8; i++) {
-		Oled_WriteCommand(0xB0 + i);
-		Oled_WriteCommand(0x00 + OLED_X_OFFSET_LOWER);
-		Oled_WriteCommand(0x10 + OLED_X_OFFSET_UPPER);
-		Oled_WriteData(&oled_buffer[OLED_WIDTH*i], OLED_WIDTH);
+void Oled_Update(struct Oled_Handle* handle) {
+	for(uint8_t i = 0; i < handle->height/8; i++) {
+		Oled_WriteCommand(handle, 0xB0 + i);
+		Oled_WriteCommand(handle, 0x00 + handle->offsetLower);
+		Oled_WriteCommand(handle, 0x10 + handle->offsetUpper);
+		Oled_WriteData(handle, handle->buf+(handle->width*i), handle->width);
 	}
 }
 
-void Oled_Fill(enum OledColor color) {
-	memset(oled_buffer, color, OLED_BUFFER_SIZE);
+void Oled_Fill(struct Oled_Handle* handle, enum Oled_Color color) {
+	memset(handle->buf, color, handle->bufSize);
 }
 
-void Oled_ClearPixel(uint16_t x, uint16_t y) {
-	if (x >= OLED_WIDTH || y >= OLED_HEIGHT) {
+void Oled_ClearPixel(struct Oled_Handle* handle, uint16_t x, uint16_t y) {
+	if (x >= handle->width || y >= handle->height) {
 		return;
 	}
-	oled_buffer[x + (y / 8) * OLED_WIDTH] &= ~(1 << (y % 8));
+	handle->buf[x + (y / 8) * handle->width] &= ~(1 << (y % 8));
 }
 
-void Oled_DrawPixel(uint16_t x, uint16_t y) {
-	if (x >= OLED_WIDTH || y >= OLED_HEIGHT) {
+void Oled_DrawPixel(struct Oled_Handle* handle, uint16_t x, uint16_t y) {
+	if (x >= handle->width || y >= handle->height) {
 		return;
 	}
-	oled_buffer[x + (y / 8) * OLED_WIDTH] |= 1 << (y % 8);
+	handle->buf[x + (y / 8) * handle->width] |= 1 << (y % 8);
 }
 
-void Oled_ClearRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
-	if (y2 > OLED_HEIGHT){
-		y2 = OLED_HEIGHT;
+void Oled_DrawHorizontalLine(struct Oled_Handle* handle, uint8_t x1, uint8_t x2, uint8_t y) {
+	const uint8_t mask = 1 << (y % 8);
+	const uint16_t offset = (y / 8) * handle->width;
+	for (uint8_t x = x1; x < x2; x++) {
+		handle->buf[x + offset] |= mask;
 	}
-	if (x2 > OLED_WIDTH){
-		x2 = OLED_WIDTH;
+}
+
+void Oled_ClearRectangle(struct Oled_Handle* handle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+	if (y2 > handle->height){
+		y2 = handle->height;
+	}
+	if (x2 > handle->width){
+		x2 = handle->width;
 	}
 	for (uint16_t y = y1; y < y2; y++) {
 		for (uint16_t x = x1; x < x2; x++) {
-			Oled_ClearPixel(x, y);
+			Oled_ClearPixel(handle, x, y);
 		}
 	}
 }
 
-void Oled_FillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
-	if (y2 > OLED_HEIGHT){
-		y2 = OLED_HEIGHT;
+void Oled_FillRectangle(struct Oled_Handle* handle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+	if (y2 > handle->height){
+		y2 = handle->height;
 	}
-	if (x2 > OLED_WIDTH){
-		x2 = OLED_WIDTH;
+	if (x2 > handle->width){
+		x2 = handle->width;
 	}
 	for (uint16_t y = y1; y < y2; y++) {
 		for (uint16_t x = x1; x < x2; x++) {
-			Oled_DrawPixel(x, y);
+			Oled_DrawPixel(handle, x, y);
 		}
 	}
 }
 
-void Oled_SetCursor(uint16_t x, uint16_t y) {
-	cursorX = x;
-	cursorY = y;
+void Oled_SetCursor(struct Oled_Handle* handle, uint16_t x, uint16_t y) {
+	handle->cursorX = x;
+	handle->cursorY = y;
 }
 
-void Oled_WriteChar(char chr, const struct Font* font) {
+void Oled_DrawChar(struct Oled_Handle* handle, char chr, const struct Font* font) {
 	if (chr < FONT_START || chr >= FONT_CHARS + FONT_START) {
 		return;
 	}
 
-	if (OLED_WIDTH < (cursorX + font->width) ||
-	OLED_HEIGHT < (cursorY + font->height)) {
+	if (handle->width < (handle->cursorX + font->width) ||
+			handle->height < (handle->cursorY + font->height)) {
 		return;
 	}
 
@@ -221,27 +220,27 @@ void Oled_WriteChar(char chr, const struct Font* font) {
 		const uint8_t data = font->data[(chr - FONT_START) * font->height + y];
 		for (uint16_t x = 0; x < font->width; x++) {
 			if ((data << x) & 0x80) {
-				Oled_DrawPixel(cursorX + x, cursorY + y);
+				Oled_DrawPixel(handle, handle->cursorX + x, handle->cursorY + y);
 			}
 		}
 	}
 
-	cursorX += font->width;
+	handle->cursorX += font->width;
 }
 
-void Oled_WriteString(const char *str, const struct Font* font) {
+void Oled_DrawString(struct Oled_Handle* handle, const char *str, const struct Font* font) {
 	while (*str) {
-		Oled_WriteChar(*str, font);
+		Oled_DrawChar(handle, *str, font);
 		str++;
 	}
 }
 
-void Oled_DrawBitmap(uint16_t x, uint16_t y, const uint8_t* bitmap,
+void Oled_DrawBitmap(struct Oled_Handle* handle, uint16_t x, uint16_t y, const uint8_t* bitmap,
 		uint16_t w, uint16_t h) {
 	int16_t byteWidth = (w + 7) / 8;
 	    uint8_t byte = 0;
 
-	    if (x >= OLED_WIDTH || y >= OLED_HEIGHT) {
+	    if (x >= handle->width || y >= handle->height) {
 	        return;
 	    }
 
@@ -254,17 +253,17 @@ void Oled_DrawBitmap(uint16_t x, uint16_t y, const uint8_t* bitmap,
 	            }
 
 	            if (byte & 0x80) {
-	                Oled_DrawPixel(x + i, y);
+	                Oled_DrawPixel(handle, x + i, y);
 	            }
 	        }
 	    }
 }
 
-void Oled_SetContrast(const uint8_t val) {
-	Oled_WriteCommand(OLED_REG_CONTRAST);
-	Oled_WriteCommand(val);
+void Oled_SetContrast(struct Oled_Handle* handle, uint8_t val) {
+	Oled_WriteCommand(handle, OLED_REG_CONTRAST);
+	Oled_WriteCommand(handle, val);
 }
 
-void Oled_SetPower(const uint8_t on) {
-	Oled_WriteCommand(0xAE | on);
+void Oled_SetPower(struct Oled_Handle* handle, uint8_t state) {
+	Oled_WriteCommand(handle, 0xAE | state);
 }

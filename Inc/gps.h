@@ -3,39 +3,39 @@
 
 #include "stdint.h"
 #include "main.h"
-#include "gpio.h"
-
-// #define GPS_HANDLE huart3
-// #define GPS_DMA_HANDLE hdma_usart3_rx
-// #define GPS_INT_PIN PPS_Pin
-
-// #define GPS_RX_BUF_SIZE 1000
-// #define GPS_TX_BUF_SIZE 1000
+#include "nmea.h"
 
 struct Gps_Handle {
+	// configuration
     UART_HandleTypeDef* huart;
     DMA_HandleTypeDef* hdma;
     
-    Gpio_Handle* intPin;
+    uint16_t intPin;
 
-    uint16_t rxBufSize;
-    uint16_t txBufSize;
+    uint16_t rxBufSize; // 1000 typical
+    uint16_t txBufSize; // 1000 typical
 
-    uint8_t usb_transmit;
-    uint8_t usb_receive;
+    uint8_t usbTransmit;
+    uint8_t usbReceive;
+
+    // internal
+    uint8_t* rxBuf;
+    uint8_t* txBuf;
+
+    uint8_t* readBuf;
+    uint8_t* usbBuf;
+
+    struct Nmea_Handle* nmea;
 };
 
-void Gps_Init(Gps_Handle* gps);
+void Gps_Init(struct Gps_Handle* handle);
 
-uint8_t Gps_UartFlag(Gps_Handle* gps, UART_HandleTypeDef* huart);
-void Gps_UartHandler(Gps_Handle* gps, uint16_t size);
+uint8_t Gps_UartFlag(struct Gps_Handle* handle, UART_HandleTypeDef* huart);
+void Gps_UartHandler(struct Gps_Handle* handle, uint16_t size);
 
-void Gps_UsbHandler(Gps_Handle* gps, uint8_t* data, uint32_t len);
+void Gps_UsbHandler(struct Gps_Handle* handle, uint8_t* data, uint16_t len);
 
-uint8_t Gps_ExtFlag(Gps_Handle* gps, uint16_t pin);
-void Gps_ExtHandler(Gps_Handle* gps, void);
-
-void Gps_SetUsbTransmit(Gps_Handle* gps, uint8_t mode);
-void Gps_SetUsbReceive(Gps_Handle* gps, uint8_t mode);
+uint8_t Gps_ExtFlag(struct Gps_Handle* handle, uint16_t pin);
+void Gps_ExtHandler(struct Gps_Handle* handle);
 
 #endif

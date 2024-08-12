@@ -56,21 +56,23 @@
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_H 0x7C //r
 
 struct Lps22hh_Handle {
+	// configuration
     SPI_HandleTypeDef* hspi;//10Mhz max
-    Gpio_Handle* csPin;
-    Gpio_Handle* intPin;
+    struct Gpio_Handle* csPin;
+
+    uint16_t intPin;
 };
 
-void Lps22hh_Init(Lps22hh_Handle* lps);
-void Lps22hh_Update(Lps22hh_Handle* lps);
+void Lps22hh_Init(struct Lps22hh_Handle* handle);
+void Lps22hh_Update(struct Lps22hh_Handle* handle);
 
-void Lps22hh_Parse(Lps22hh_Handle* lps);
-uint8_t* Lps22hh_Data(Lps22hh_Handle* lps);
+void Lps22hh_Parse(struct Lps22hh_Handle* handle);
+uint8_t* Lps22hh_Data(struct Lps22hh_Handle* handle);
 
-uint8_t Lps22hh_ExtFlag(Lps22hh_Handle* lps, uint16_t pin);
-void Lps22hh_ExtHandler(Lps22hh_Handle* lps);
+uint8_t Lps22hh_ExtFlag(struct Lps22hh_Handle* handle, uint16_t pin);
+void Lps22hh_ExtHandler(struct Lps22hh_Handle* handle);
 
-uint32_t Lps22hh_Pressure(Lps22hh_Handle* lps);
-int16_t Lps22hh_Temperature(Lps22hh_Handle* lps);
+uint32_t Lps22hh_Pressure(struct Lps22hh_Handle* handle);
+int16_t Lps22hh_Temperature(struct Lps22hh_Handle* handle);
 
 #endif
