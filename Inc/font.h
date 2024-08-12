@@ -14,6 +14,6 @@ struct Font {
 };
 
 extern const struct Font Font_7x10;
-extern const struct Font Font_6x10;
+extern const struct Font Font_6x8;
 
 #endif

@@ -1,8 +1,6 @@
 #ifndef INC_QMC5883_H_
 #define INC_QMC5883_H_
 
-#include "qmc5883_conf.h"
-
 #include "stdint.h"
 
 #define QMC5883_ADDRESS 0x1A
@@ -28,15 +26,20 @@
 
 #define QMC5883_REG_CHIP_ID 0x0D //r
 
-void Qmc5883_Init(void);
+struct Qmc5883 {
+    I2C_HandleTypeDef* hi2c;
+    Gpio_Handle* intPin;
+};
 
-uint8_t Qmc5883_ExtFlag(uint16_t pin);
-void Qmc5883_ExtHandler(void);
+void Qmc5883_Init(Qmc5883* qmc);
 
-int16_t Qmc5883_X(void);
-int16_t Qmc5883_Y(void);
-int16_t Qmc5883_Z(void);
+uint8_t Qmc5883_ExtFlag(Qmc5883* qmc, uint16_t pin);
+void Qmc5883_ExtHandler(Qmc5883* qmc);
 
-int16_t Qmc5883_Temperature(void);
+int16_t Qmc5883_X(Qmc5883* qmc);
+int16_t Qmc5883_Y(Qmc5883* qmc);
+int16_t Qmc5883_Z(Qmc5883* qmc);
+
+int16_t Qmc5883_Temperature(Qmc5883* qmc);
 
 #endif

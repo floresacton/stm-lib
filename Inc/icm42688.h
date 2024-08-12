@@ -1,8 +1,6 @@
 #ifndef INC_ICM42688_H_
 #define INC_ICM42688_H_
 
-#include "icm42688_conf.h"
-
 #include "stdint.h"
 #include "main.h"
 
@@ -160,18 +158,24 @@
 #define ICM42688_REG_OFFSET_USER7 0x7E //r-w
 #define ICM42688_REG_OFFSET_USER8 0x7F //r-w
 
+// #define ICM42688_INT_PIN INTG_Pin
 
-void Icm42688_Init(void);
+// //ensure no overflow
+// #define ICM42688_REF_HANDLE htim4
+// #define ICM42688_REF_FREQ 16000000
 
-uint8_t Icm42688_ExtFlag(uint16_t pin);
-void Icm42688_ExtHandler(void);
+// #define ICM42688_CALC_FREQ 500
 
-int16_t Icm4288_VelX(void);
-int16_t Icm4288_VelY(void);
-int16_t Icm4288_VelZ(void);
+struct Icm42688_Handle {
+    SPI_HandleTypeDef* hspi;//24Mhz max
+    Gpio_Handle* intPin;
 
-int16_t Icm4288_AccelX(void);
-int16_t Icm4288_AccelY(void);
-int16_t Icm4288_AccelZ(void);
+    TIM_HandleTypeDef htim;
+};
+
+void Icm42688_Init(Icm42688_Handle* icm);
+
+uint8_t Icm42688_ExtFlag(Icm42688_Handle* icm, uint16_t pin);
+void Icm42688_ExtHandler(Icm42688_Handle* icm);
 
 #endif

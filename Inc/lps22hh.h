@@ -1,11 +1,12 @@
 #ifndef INC_LPS22HH_H_
 #define INC_LPS22HH_H_
 
-#include "lps22hh_conf.h"
-
 #include "stdint.h"
+#include "main.h"
+#include "gpio.h"
 
 #define LPS22HH_DATA_SIZE 5
+#define LPS22HH_BUF_SIZE LPS22HH_COUNT*LPS22HH_DATA_SIZE
 
 #define LPS22HH_ADDRESS 0xBA
 #define LPS22HH_ID 0b10110011
@@ -54,12 +55,22 @@
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_L 0x7B //r
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_H 0x7C //r
 
-void Lps22hh_Init(void);
+struct Lps22hh_Handle {
+    SPI_HandleTypeDef* hspi;//10Mhz max
+    Gpio_Handle* csPin;
+    Gpio_Handle* intPin;
+};
 
-uint8_t Lps22hh_ExtFlag(uint16_t pin);
-void Lps22hh_ExtHandler(void);
+void Lps22hh_Init(Lps22hh_Handle* lps);
+void Lps22hh_Update(Lps22hh_Handle* lps);
 
-uint32_t Lps22hh_Pressure(enum Lps22hhId lps);
-int16_t Lps22hh_Temperature(enum Lps22hhId lps);
+void Lps22hh_Parse(Lps22hh_Handle* lps);
+uint8_t* Lps22hh_Data(Lps22hh_Handle* lps);
+
+uint8_t Lps22hh_ExtFlag(Lps22hh_Handle* lps, uint16_t pin);
+void Lps22hh_ExtHandler(Lps22hh_Handle* lps);
+
+uint32_t Lps22hh_Pressure(Lps22hh_Handle* lps);
+int16_t Lps22hh_Temperature(Lps22hh_Handle* lps);
 
 #endif

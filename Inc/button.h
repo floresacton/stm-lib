@@ -1,17 +1,23 @@
 #ifndef INC_BUTTON_H_
 #define INC_BUTTON_H_
 
-#include "button_conf.h"
-
 #include "stdint.h"
 #include "main.h"
+#include "gpio.h"
 
-void Button_Init(void);
+struct Button_Handle {
+    TIM_HandleTypeDef* htim; // 50Hz typ
 
-uint8_t Button_Pressed(enum ButtonId button);
+    Gpio_Handle* buttonPins;
+    uint8_t buttonCount;
+};
 
-void Button_TimHandler(void);
-uint8_t Button_TimFlag(TIM_HandleTypeDef *htim);
+void Button_Init(Button_Handle* button);
+
+uint8_t Button_Pressed(Button_Handle* button, uint8_t button);
+
+void Button_TimHandler(Button_Handle* button);
+uint8_t Button_TimFlag(Button_Handle* button, TIM_HandleTypeDef *htim);
 
 
 #endif
