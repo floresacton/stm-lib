@@ -1,5 +1,6 @@
 #include "tach.h"
 #include "stdlib.h"
+#include "string.h"
 #include "main.h"
 
 void Tach_Init(struct Tach_Handle* handle) {
@@ -11,6 +12,18 @@ void Tach_Init(struct Tach_Handle* handle) {
 
 	handle->checkpointAccum = malloc(handle->channelCount * 4);
 	handle->checkpointPasses = malloc(handle->channelCount * 4);
+
+	memset(handle->rpm, 0, handle->channelCount * 2);
+
+	memset(handle->count, 0, handle->channelCount * 4);
+	memset(handle->countAccum, 0, handle->channelCount * 4);
+	memset(handle->passes, 0, handle->channelCount * 4);
+
+	memset(handle->checkpointAccum, 0, handle->channelCount * 4);
+	memset(handle->checkpointPasses, 0, handle->channelCount * 4);
+
+	HAL_TIM_Base_Start_IT(handle->htimCount);
+	HAL_TIM_Base_Start_IT(handle->htimCalc);
 }
 
 uint8_t Tach_TimFlagCalc(struct Tach_Handle* handle, TIM_HandleTypeDef* htim) {
@@ -19,15 +32,15 @@ uint8_t Tach_TimFlagCalc(struct Tach_Handle* handle, TIM_HandleTypeDef* htim) {
 void Tach_TimHandlerCalc(struct Tach_Handle* handle) {
 	for (uint8_t i = 0; i < handle->channelCount; i++) {
 		if (handle->checkpointPasses[i]) {
-			handle->rpm[i] = (float)handle->freqRef*60.0*(float)handle->checkpointPasses[i]/((float)handle->checkpointAccum[i]*(float)handle->spokes[i]);
+			handle->rpm[i] = (float)handle->countFreq*60.0*(float)handle->checkpointPasses[i]/((float)handle->checkpointAccum[i]*(float)handle->spokes[i]);
 			handle->countAccum[i] = 0;
 			handle->checkpointAccum[i] = 0;
 		}else if(handle->passes[i]){
-			handle->rpm[i] = (float)handle->freqRef*60.0*(float)handle->passes[i]/((float)handle->countAccum[i]*(float)handle->spokes[i]);
+			handle->rpm[i] = (float)handle->countFreq*60.0*(float)handle->passes[i]/((float)handle->countAccum[i]*(float)handle->spokes[i]);
 			handle->countAccum[i] = 0;
 			handle->checkpointAccum[i] = 0;
 		}else {
-			const uint16_t new_rpm = (float)handle->freqRef*60.0/((float)handle->spokes[i]*(float)handle->count[i]);
+			const uint16_t new_rpm = (float)handle->countFreq*60.0/((float)handle->spokes[i]*(float)handle->count[i]);
 			if (new_rpm < handle->rpm[i]) {
 				handle->rpm[i] = new_rpm;
 			}
@@ -48,7 +61,7 @@ void Tach_TimHandlerCount(struct Tach_Handle* handle) {
 }
 
 void Tach_Trigger(struct Tach_Handle* handle, uint8_t chan) {
-	if (handle->count[chan] >= 60.0*(float)handle->freqRef/(handle->spokes[chan]*handle->maxRpm[chan])) {
+	if (handle->count[chan] >= 60.0*(float)handle->countFreq/(handle->spokes[chan]*handle->maxRpm[chan])) {
 		handle->passes[chan]++;
 		handle->countAccum[chan] += handle->count[chan];
 		if (handle->passes[chan] % handle->spokes[chan] == 0) {
@@ -59,6 +72,6 @@ void Tach_Trigger(struct Tach_Handle* handle, uint8_t chan) {
 	}
 }
 
-uint16_t Tach_Rpm(struct Tach_Handle* handle, uint8_t chan) {
+uint16_t Tach_GetRpm(struct Tach_Handle* handle, uint8_t chan) {
 	return handle->rpm[chan];
 }

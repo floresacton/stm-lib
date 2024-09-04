@@ -9,7 +9,7 @@ struct Tach_Handle {
     TIM_HandleTypeDef* htimCount; // 50kHz typical
     TIM_HandleTypeDef* htimCalc; // 50Hz typical
 
-    uint32_t freqRef; // 50000 typical
+    uint32_t countFreq; // 50000 typical
 
     uint8_t* spokes;
     uint16_t* maxRpm;
@@ -31,11 +31,11 @@ void Tach_Init(struct Tach_Handle* handle);
 uint8_t Tach_TimFlagCalc(struct Tach_Handle* handle, TIM_HandleTypeDef* htim);
 void Tach_TimHandlerCalc(struct Tach_Handle* handle);
 
-uint8_t Tach_TimFlagRef(struct Tach_Handle* handle, TIM_HandleTypeDef* htim);
-void Tach_TimHandlerRef(struct Tach_Handle* handle);
+uint8_t Tach_TimFlagCount(struct Tach_Handle* handle, TIM_HandleTypeDef* htim);
+void Tach_TimHandlerCount(struct Tach_Handle* handle);
 
 void Tach_Trigger(struct Tach_Handle* handle, uint8_t chan);
 
-uint16_t Tach_Rpm(struct Tach_Handle* handle, uint8_t chan);
+uint16_t Tach_GetRpm(struct Tach_Handle* handle, uint8_t chan);
 
 #endif

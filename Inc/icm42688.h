@@ -3,6 +3,9 @@
 
 #include "stdint.h"
 #include "main.h"
+#include "algebra.h"
+
+#define ICM42688_ID 0b01000111
 
 //bank 0
 #define ICM42688_REG_DEVICE_CONFIG 0x11 //r-w
@@ -91,7 +94,7 @@
 
 #define ICM42688_REG_WHO_AM_I 0x75 //r
 
-#define ICM42688_REG_REG_BANK_SEL 0x76 //r-w
+#define ICM42688_REG_BANK_SEL 0x76 //r-w
 
 //bank 1
 #define ICM42688_REG_SENSOR_CONFIG0 0x03 //r-w
@@ -158,25 +161,218 @@
 #define ICM42688_REG_OFFSET_USER7 0x7E //r-w
 #define ICM42688_REG_OFFSET_USER8 0x7F //r-w
 
-// #define ICM42688_INT_PIN INTG_Pin
+enum Icm42688_Bank {
+	Icm42688_Bank0 = 0u,
+	Icm42688_Bank1 = 1u,
+	Icm42688_Bank2 = 2u,
+	Icm42688_Bank3 = 3u,
+	Icm42688_Bank4 = 4u,
+};
 
-// //ensure no overflow
-// #define ICM42688_REF_HANDLE htim4
-// #define ICM42688_REF_FREQ 16000000
+enum Icm42688_Int {
+	Icm42688_Int1 = 0u,
+	Icm42688_Int2 = 3u,
+};
+enum Icm42688_IntMode {
+	Icm42688_IntModePulse = 0u,
+	Icm42688_IntModeLatch = 1u,
+};
+enum Icm42688_IntDrive {
+	Icm42688_IntDriveOpen = 0u,
+	Icm42688_IntDrivePush = 1u,
+};
+enum Icm42688_IntPolarity {
+	Icm42688_IntPolarityLow = 0u,
+	Icm42688_IntPolarityHigh = 1u,
+};
 
-// #define ICM42688_CALC_FREQ 500
+enum Icm42688_FifoMode {
+	Icm42688_FifoModeBypass = 0u,
+	Icm42688_FifoModeStream = 1u,
+	Icm42688_FifoModeFill = 2u,
+};
+
+enum Icm42688_FifoCountMode {
+	Icm42688_FifoCountModeByte = 0u,
+	Icm42688_FifoCountModeRecord = 1u,
+};
+
+enum Icm42688_Endian {
+	Icm42688_EndianLittle = 0u,
+	Icm42688_EndianBig = 1u,
+};
+
+
+enum Icm42688_Odr {
+	Icm42688_Odr32k = 1u,
+	Icm42688_Odr16k = 2u,
+	Icm42688_Odr8k = 3u,
+	Icm42688_Odr4k = 4u,
+	Icm42688_Odr2k = 5u,
+	Icm42688_Odr1k = 6u,
+	Icm42688_Odr500 = 15u,
+	Icm42688_Odr200 = 7u,
+	Icm42688_Odr100 = 8u,
+	Icm42688_Odr50 = 9u,
+	Icm42688_Odr25 = 10u,
+	Icm42688_Odr12 = 11u, // actually 12.5
+
+	// not available for gyroscope
+	Icm42688_Odr6 = 12u, // actually 6.25
+	Icm42688_Odr3 = 13u, // actually 3.125
+	Icm42688_Odr1 = 14u, // actually 1.5625
+};
+
+// in degrees per second
+enum Icm42688_GyroFsr {
+	Icm42688_GyroFsr2000 = 0u,
+	Icm42688_GyroFsr1000 = 1u,
+	Icm42688_GyroFsr500 = 2u,
+	Icm42688_GyroFsr250 = 3u,
+	Icm42688_GyroFsr125 = 4u,
+	Icm42688_GyroFsr62 = 5u, // actually 62.5
+	Icm42688_GyroFsr31 = 6u, // actually 31.25
+	Icm42688_GyroFsr15 = 7u, // actually 15.625
+};
+
+// in g
+enum Icm42688_AccelFsr {
+	Icm42688_AccelFsr16 = 0u,
+	Icm42688_AccelFsr8 = 1u,
+	Icm42688_AccelFsr4 = 2u,
+	Icm42688_AccelFsr2 = 3u,
+};
+
+enum Icm42688_GyroMode {
+	Icm42688_GyroModeOff = 0u,
+	Icm42688_GyroModeStandby = 1u,
+	Icm42688_GyroModeLowNoise = 3u,
+};
+
+enum Icm42688_AccelMode {
+	Icm42688_AccelModeOff = 0u,
+	Icm42688_AccelModeLowPower = 2u,
+	Icm42688_AccelModeLowNoise = 3u,
+};
+
+// in bandwidth Hz
+enum Icm42688_TempFilt {
+	Icm42688_TempFilt4k = 0u, // 0.125ms latency
+	Icm42688_TempFilt170 = 1u, // 1ms latency
+	Icm42688_TempFilt82 = 2u, // 2ms latency
+	Icm42688_TempFilt40 = 3u, // 4ms latency
+	Icm42688_TempFilt20 = 4u, // 8ms latency
+	Icm42688_TempFilt10 = 5u, // 16ms latency
+	Icm42688_TempFilt5 = 6u, // 32ms latency
+};
+
+enum Icm42688_FiltOrder {
+	Icm42688_FiltOrder1 = 0u,
+	Icm42688_FiltOrder2 = 1u,
+	Icm42688_FiltOrder3 = 2u,
+};
+
+// in ODR division
+enum Icm42688_Filt {
+	Icm42688_Filt2 = 0u,
+	Icm42688_Filt4 = 1u,
+	Icm42688_Filt5 = 2u,
+	Icm42688_Filt8 = 3u,
+	Icm42688_Filt10 = 4u,
+	Icm42688_Filt16 = 5u,
+	Icm42688_Filt20 = 6u,
+	Icm42688_Filt40 = 7u,
+
+	// low latency options
+	Icm42688_FiltDec = 14u, // basic decimation
+	Icm42688_FiltDec8 = 15u, // basic decimation/8
+};
+
+// in microseconds
+enum Icm42688_TimeRes {
+	Icm42688_TimeRes1 = 0u,
+	Icm42688_TimeRes16 = 1u,
+	Icm42688_TimeResRtc = 1u,
+};
+
+// in microseconds
+enum Icm42688_IntDuration {
+	Icm42688_IntDuration100 = 0u,
+	Icm42688_IntDuration8 = 1u,
+};
+
+// interrupt mask
+enum Icm42688_IntSource {
+	Icm42688_IntSourceNone = 0x00u,
+	Icm42688_IntSourceFsync = 0x40u,
+	Icm42688_IntSourcePll = 0x20u,
+	Icm42688_IntSourceReset = 0x10u,
+	Icm42688_IntSourceDrdy = 0x08u,
+	Icm42688_IntSourceThresh = 0x04u,
+	Icm42688_IntSourceFull = 0x02u,
+	Icm42688_IntSourceAgc = 0x01u,
+};
 
 struct Icm42688_Handle {
 	// configuration
-    SPI_HandleTypeDef* hspi;//24Mhz max
-    uint16_t intPin;
+    SPI_HandleTypeDef* hspi; // 24Mhz max
+	GPIO_TypeDef* csPort;
+	uint16_t csPin;
 
-    TIM_HandleTypeDef* htim;
+	uint16_t intPin;
+
+//	struct Vector3f* aBias;
+//	struct Vector3f* aScale;
+//
+//	struct Vector3f* gBias;
+//	struct Vector3f* gScale;
+    // internal
+    uint8_t init;
+
+    uint8_t* data;
 };
 
 void Icm42688_Init(struct Icm42688_Handle* handle);
 
 uint8_t Icm42688_ExtFlag(struct Icm42688_Handle* handle, uint16_t pin);
 void Icm42688_ExtHandler(struct Icm42688_Handle* handle);
+
+void Icm42688_Reset(struct Icm42688_Handle* handle);
+void Icm42688_ResetSignalPath(struct Icm42688_Handle* handle);
+void Icm42688_FlushFifo(struct Icm42688_Handle* handle);
+
+uint8_t Icm42688_GetStatus(struct Icm42688_Handle* handle);
+
+void Icm42688_SetBank(struct Icm42688_Handle* handle, enum Icm42688_Bank bank);
+
+void Icm42688_SetInt(struct Icm42688_Handle* handle, enum Icm42688_Int interrupt,
+		enum Icm42688_IntMode mode, enum Icm42688_IntDrive drive, enum Icm42688_IntPolarity polarity);
+void Icm42688_SetFifo(struct Icm42688_Handle* handle, enum Icm42688_FifoMode mode);
+void Icm42688_SetFifoHoldData(struct Icm42688_Handle* handle, uint8_t value);
+void Icm42688_SetFifoCountMode(struct Icm42688_Handle* handle, enum Icm42688_FifoCountMode mode);
+void Icm42688_SetEndian(struct Icm42688_Handle* handle, enum Icm42688_Endian endian);
+void Icm42688_SetGyroMode(struct Icm42688_Handle* handle, enum Icm42688_GyroMode mode);
+void Icm42688_SetAccelMode(struct Icm42688_Handle* handle, enum Icm42688_AccelMode mode);
+void Icm42688_SetGyroFsr(struct Icm42688_Handle* handle, enum Icm42688_GyroFsr fsr);
+void Icm42688_SetGyroOdr(struct Icm42688_Handle* handle, enum Icm42688_Odr odr);
+void Icm42688_SetAccelFsr(struct Icm42688_Handle* handle, enum Icm42688_AccelFsr fsr);
+void Icm42688_SetAccelOdr(struct Icm42688_Handle* handle, enum Icm42688_Odr odr);
+void Icm42688_SetTempFilt(struct Icm42688_Handle* handle, enum Icm42688_TempFilt filt);
+void Icm42688_SetGyroFiltOrder(struct Icm42688_Handle* handle, enum Icm42688_FiltOrder filt);
+void Icm42688_SetAccelFilt(struct Icm42688_Handle* handle, enum Icm42688_Filt filt);
+void Icm42688_SetGyroFilt(struct Icm42688_Handle* handle, enum Icm42688_Filt filt);
+void Icm42688_SetAccelFiltOrder(struct Icm42688_Handle* handle, enum Icm42688_FiltOrder filt);
+void Icm42688_SetTimeRes(struct Icm42688_Handle* handle, enum Icm42688_TimeRes res);
+void Icm42688_SetTimeDelta(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetTimeFsync(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetFifoHires(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetFifoTemp(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetFifoGyro(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetFifoAccel(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetFifoIntThresh(struct Icm42688_Handle* handle, uint16_t thresh);
+void Icm42688_SetIntDuration(struct Icm42688_Handle* handle, enum Icm42688_IntDuration duration);
+void Icm42688_SetIntDeassert(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetIntAsync(struct Icm42688_Handle* handle, uint8_t state);
+void Icm42688_SetIntSource(struct Icm42688_Handle* handle, enum Icm42688_Int interrupt, enum Icm42688_IntSource source);
 
 #endif

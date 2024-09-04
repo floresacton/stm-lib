@@ -4,54 +4,44 @@
 #include "stdlib.h"
 
 void Memory_Init(struct Memory_Handle* handle) {
-	handle->bufSize = 1 + handle->byteCount + 2 * handle->shortCount + 4 * (handle->intCount + handle->floatCount);
-	handle->buf = malloc(handle->bufSize);
+	for (uint8_t i = 0; i < handle->count; i++) {
+		struct Memory_Variable* var = handle->vars[i];
+		var->address = 4 * (i + 1);
 
-	handle->byteStart = handle->buf + 1;
-	handle->shortStart = handle->byteStart + handle->byteCount;
-	handle->intStart = handle->shortStart + 2 * handle->shortCount;
-	handle->floatStart = handle->intStart + 4 * handle->intCount;
+		float value = var->max;
+		int8_t digit = -1;
+		while (value >= 1) {
+			value /= 10.0f;
+			digit++;
+		}
+		var->maxDigit = digit;
+	}
 
-	Eeprom_Read(handle->eeprom, 0, handle->buf, handle->bufSize);
-	if (Eeprom_ReadByte(handle->eeprom, 0) != handle->hash) {
-		Eeprom_WriteByte(handle->eeprom, 0, handle->hash);
+	float hash;
+	Eeprom_Read(handle->eeprom, 0, (uint8_t*)&hash, 4);
+	if (hash != handle->hash) {
+		Eeprom_Write(handle->eeprom, 0, (uint8_t*)&hash, 4);
 		Memory_Reset(handle);
+	}else{
+		for (uint8_t i = 0; i < handle->count; i++) {
+			struct Memory_Variable* var = handle->vars[i];
+			Eeprom_Read(handle->eeprom, var->address, (uint8_t*)&var->value, 4);
+		}
 	}
 }
 
-__weak void Memory_Reset(struct Memory_Handle* handle) {
+void Memory_Reset(struct Memory_Handle* handle) {
+	for (uint8_t i = 0; i < handle->count; i++) {
+		struct Memory_Variable* var = handle->vars[i];
+		Eeprom_Write(handle->eeprom, var->address, (uint8_t*)&var->reset, 4);
+		var->value = var->reset;
+	}
 }
 
-uint8_t Memory_ReadByte(struct Memory_Handle* handle, uint8_t loc) {
-	return handle->byteStart[loc];
-}
-uint16_t Memory_ReadShort(struct Memory_Handle* handle, uint8_t loc) {
-	return ((uint16_t*)handle->shortStart)[loc];
-}
-uint32_t Memory_ReadInt(struct Memory_Handle* handle, uint8_t loc) {
-	return ((uint32_t*)handle->intStart)[loc];
-}
-float Memory_ReadFloat(struct Memory_Handle* handle, uint8_t loc) {
-	return ((float*)handle->floatStart)[loc];
+void Memory_Save(struct Memory_Handle* handle, struct Memory_Variable* var) {
+	Eeprom_Write(handle->eeprom, var->address, (uint8_t*)&var->reset, 4);
 }
 
-void Memory_WriteByte(struct Memory_Handle* handle, uint8_t loc, uint8_t val) {
-	uint8_t* pos = handle->byteStart + loc;
-	*pos = val;
-	Eeprom_Write(handle->eeprom, pos-handle->buf, &val, 1);
-}
-void Memory_WriteShort(struct Memory_Handle* handle, uint8_t loc, uint16_t val) {
-	uint16_t* pos = (uint16_t*)handle->shortStart + loc;
-	*pos = val;
-	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
-}
-void Memory_WriteInt(struct Memory_Handle* handle, uint8_t loc, uint32_t val) {
-	uint32_t* pos = (uint32_t*)handle->intStart + loc;
-	*pos = val;
-	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
-}
-void Memory_WriteFloat(struct Memory_Handle* handle, uint8_t loc, float val) {
-	float* pos = (float*)handle->floatStart + loc;
-	*pos = val;
-	Eeprom_Write(handle->eeprom, (uint8_t*)pos-handle->buf, (uint8_t*)&val, 2);
+void Memory_Print(struct Memory_Variable* var, char* buf) {
+	// TODO
 }

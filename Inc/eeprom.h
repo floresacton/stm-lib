@@ -1,5 +1,5 @@
-#ifndef INC_AT24C_H_
-#define INC_AT24C_H_
+#ifndef INC_EEPROM_H_
+#define INC_EEPROM_H_
 
 #include "stdint.h"
 #include "main.h"
@@ -9,8 +9,8 @@ struct Eeprom_Handle {
     I2C_HandleTypeDef* hi2c;
     uint8_t address;
 
+    uint16_t pages;
     uint8_t pageSize;
-    uint16_t pageCount;
 };
 
 void Eeprom_Read(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len);
@@ -22,6 +22,5 @@ void Eeprom_WriteByte(struct Eeprom_Handle* handle, uint16_t address, uint8_t va
 
 //wrap memory
 void Eeprom_ReadNext(struct Eeprom_Handle* handle, uint8_t *buf, uint8_t len);
-
 
 #endif

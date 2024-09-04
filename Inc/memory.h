@@ -4,38 +4,37 @@
 #include "stdint.h"
 #include "eeprom.h"
 
+struct Memory_Variable {
+	// configuration
+	float reset;
+
+	float min;
+	float max;
+
+	int8_t minDigit; // can be negative
+
+	// internal
+	int8_t maxDigit;
+
+	float value;
+	uint16_t address;
+};
+
 struct Memory_Handle {
 	// configuration
 	struct Eeprom_Handle* eeprom;
 
-	uint8_t byteCount;
-	uint8_t shortCount;
-	uint8_t intCount;
-	uint8_t floatCount;
+	float hash;
 
-	uint8_t hash;
-
-	// internal
-	uint8_t* buf;
-	uint8_t bufSize;
-
-	uint8_t* byteStart;
-	uint8_t* shortStart;
-	uint8_t* intStart;
-	uint8_t* floatStart;
+	struct Memory_Variable** vars;
+	uint8_t count;
 };
 
 void Memory_Init(struct Memory_Handle* handle);
-__weak void Memory_Reset(struct Memory_Handle* handle);
 
-uint8_t Memory_ReadByte(struct Memory_Handle* handle ,uint8_t loc);
-uint16_t Memory_ReadShort(struct Memory_Handle* handle, uint8_t loc);
-uint32_t Memory_ReadInt(struct Memory_Handle* handle, uint8_t loc);
-float Memory_ReadFloat(struct Memory_Handle* handle, uint8_t loc);
+void Memory_Reset(struct Memory_Handle* handle);
+void Memory_Save(struct Memory_Handle* handle, struct Memory_Variable* var);
 
-void Memory_WriteByte(struct Memory_Handle* handle, uint8_t loc, uint8_t val);
-void Memory_WriteShort(struct Memory_Handle* handle, uint8_t loc, uint16_t val);
-void Memory_WriteInt(struct Memory_Handle* handle, uint8_t loc, uint32_t val);
-void Memory_WriteFloat(struct Memory_Handle* handle, uint8_t loc, float val);
+void Memory_Print(struct Memory_Variable* var, char* buf);
 
 #endif

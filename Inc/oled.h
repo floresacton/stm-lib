@@ -1,44 +1,31 @@
 #ifndef INC_OLED_H_
 #define INC_OLED_H_
 
-// //#define OLED_I2C
-// //#define OLED_HANDLE hi2c2
-// //#define OLED_ADDRESS (0x3C << 1)
-
-// #define OLED_WIDTH 128
-// #define OLED_HEIGHT 64
-// #define OLED_BUFFER_SIZE OLED_WIDTH * OLED_HEIGHT / 8
-
-// #define OLED_X_OFFSET 0
-// #define OLED_X_OFFSET_LOWER (OLED_X_OFFSET & 0x0F)
-// #define OLED_X_OFFSET_UPPER ((OLED_X_OFFSET >> 4) & 0x07)
-
 #include "stdint.h"
 #include "font.h"
 #include "main.h"
 
 #define OLED_REG_CONTRAST 0x81
 
-enum Oled_Mode {
-    Oled_I2c = 0u,
-    Oled_Spi = 1u,
-};
-
 enum Oled_Color {
-    Oled_Black = 0x00u,
-    Oled_White = 0xFFu,
+    Oled_ColorBlack = 0x00u,
+    Oled_ColorWhite = 0xFFu,
 };
 
 struct Oled_Handle {
-    enum Oled_Mode mode;
-
     I2C_HandleTypeDef* hi2c;
     uint8_t address;
 
     SPI_HandleTypeDef* hspi; // 10MHz max
-    struct Gpio_Handle* csPin;
-    struct Gpio_Handle* dcPin; // command
-    struct Gpio_Handle* rsPin; // reset
+
+    GPIO_TypeDef* csPort;
+    uint16_t csPin;
+    //command
+    GPIO_TypeDef* dcPort;
+    uint16_t dcPin;
+    //reset
+    GPIO_TypeDef* rsPort;
+    uint16_t rsPin;
 
     uint8_t width;
     uint8_t height;

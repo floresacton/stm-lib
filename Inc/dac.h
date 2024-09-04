@@ -10,6 +10,7 @@ struct Dac_Handle {
     uint8_t channel;
 };
 
+// 12 bits max value 4095
 void Dac_Set(struct Dac_Handle* handle, uint16_t value);
 
 #endif

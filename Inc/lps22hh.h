@@ -3,7 +3,6 @@
 
 #include "stdint.h"
 #include "main.h"
-#include "gpio.h"
 
 #define LPS22HH_DATA_SIZE 5
 #define LPS22HH_BUF_SIZE LPS22HH_COUNT*LPS22HH_DATA_SIZE
@@ -55,24 +54,70 @@
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_L 0x7B //r
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_H 0x7C //r
 
+enum Lps22hh_Odr {
+	Lps22hh_OdrOnce = 0u,
+	Lps22hh_Odr1 = 1u,
+	Lps22hh_Odr10 = 2u,
+	Lps22hh_Odr25 = 3u,
+	Lps22hh_Odr50 = 4u,
+	Lps22hh_Odr75 = 5u,
+	Lps22hh_Odr100 = 6u,
+	Lps22hh_Odr200 = 7u,
+};
+
+enum Lps22hh_Filt {
+	Lps22hh_Filt2 = 0u,
+	Lps22hh_Filt9 = 2u,
+	Lps22hh_Filt20 = 3u,
+};
+
 struct Lps22hh_Handle {
 	// configuration
     SPI_HandleTypeDef* hspi;//10Mhz max
-    struct Gpio_Handle* csPin;
+
+    GPIO_TypeDef* csPort;
+    uint16_t csPin;
 
     uint16_t intPin;
+
+    // internal
+    uint8_t init;
+
+    uint8_t* data;
 };
 
 void Lps22hh_Init(struct Lps22hh_Handle* handle);
-void Lps22hh_Update(struct Lps22hh_Handle* handle);
 
-void Lps22hh_Parse(struct Lps22hh_Handle* handle);
-uint8_t* Lps22hh_Data(struct Lps22hh_Handle* handle);
-
+// functions for easily interfacing into main program
 uint8_t Lps22hh_ExtFlag(struct Lps22hh_Handle* handle, uint16_t pin);
 void Lps22hh_ExtHandler(struct Lps22hh_Handle* handle);
 
-uint32_t Lps22hh_Pressure(struct Lps22hh_Handle* handle);
-int16_t Lps22hh_Temperature(struct Lps22hh_Handle* handle);
+void Lps22hh_Reset(struct Lps22hh_Handle* handle);
+
+void Lps22hh_SetODR(struct Lps22hh_Handle* handle, enum Lps22hh_Odr odr);
+void Lps22hh_SetFilter(struct Lps22hh_Handle* handle, enum Lps22hh_Filt filter);
+void Lps22hh_SetInterrupt(struct Lps22hh_Handle* handle, uint8_t state);
+
+// example usage with STM32 HAL
+/*
+extern SPI_HandleTypeDef hspi1;
+static struct Lps22hh_Handle pressure = {.hspi = &hspi1, .csPin = , .csPort = , .intPin = DRDYP_Pin};
+
+void init() {
+	Lps22hh_Init(&pressure);
+}
+
+void loop() {
+	do whatever you want with
+	pressure.data
+
+	it holds info in 5 bytes
+	3 bytes for pressure and 2 for temperature
+	pr[0], pr[1], pr[2], tmp[0], tmp[1]
+
+	You can either send bytes to computer
+	or parse them directly on the microcontroller
+}
+*/
 
 #endif

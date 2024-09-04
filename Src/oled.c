@@ -1,37 +1,39 @@
 #include "oled.h"
 #include "string.h"
+#include "stdlib.h"
 #include "main.h"
-#include "gpio.h"
 
 void Oled_Reset(struct Oled_Handle* handle) {
-	if (handle->mode == Oled_Spi) {
-		Gpio_Write(handle->csPin, 1);
+	if (handle->hspi) {
+		HAL_GPIO_WritePin(handle->csPort, handle->csPin, 1);
 
-		Gpio_Write(handle->rsPin, 0);
-		HAL_Delay(10);
-		Gpio_Write(handle->rsPin, 1);
-		HAL_Delay(10);
+		if (handle->rsPort) {
+			HAL_GPIO_WritePin(handle->rsPort, handle->rsPin, 0);
+			HAL_Delay(10);
+			HAL_GPIO_WritePin(handle->rsPort, handle->rsPin, 1);
+			HAL_Delay(10);
+		}
 	}
 }
 
 void Oled_WriteCommand(struct Oled_Handle* handle, uint8_t command) {
-	if (handle->mode == Oled_Spi) {
-		Gpio_Write(handle->csPin, 0);
-		Gpio_Write(handle->dcPin, 0); // command
+	if (handle->hspi) {
+		HAL_GPIO_WritePin(handle->csPort, handle->csPin, 0);
+		HAL_GPIO_WritePin(handle->dcPort, handle->dcPin, 0); // command
 		HAL_SPI_Transmit(handle->hspi, &command, 1, HAL_MAX_DELAY);
-		Gpio_Write(handle->csPin, 1);
-	}else if (handle->mode == Oled_I2c) {
+		HAL_GPIO_WritePin(handle->csPort, handle->csPin, 1);
+	} else {
 		HAL_I2C_Mem_Write(handle->hi2c, handle->address, 0x00, 1, &command, 1, HAL_MAX_DELAY);
 	}
 }
 
 void Oled_WriteData(struct Oled_Handle* handle, uint8_t *buf, uint32_t len) {
-	if (handle->mode == Oled_Spi) {
-		Gpio_Write(handle->csPin, 0);
-		Gpio_Write(handle->dcPin, 1); // command
+	if (handle->hspi) {
+		HAL_GPIO_WritePin(handle->csPort, handle->csPin, 0);
+		HAL_GPIO_WritePin(handle->dcPort, handle->dcPin, 1); // data
 		HAL_SPI_Transmit(handle->hspi, buf, len, HAL_MAX_DELAY);
-		Gpio_Write(handle->csPin, 1);
-	}else if (handle->mode == Oled_I2c) {
+		HAL_GPIO_WritePin(handle->csPort, handle->csPin, 1);
+	} else {
 		HAL_I2C_Mem_Write(handle->hi2c, handle->address, 0x40, 1, buf, len, HAL_MAX_DELAY);
 	}
 }
@@ -52,8 +54,6 @@ void Oled_Init(struct Oled_Handle* handle) {
 	handle->cursorX = 0;
 	handle->cursorY = 0;
 
-	Oled_Reset(handle);
-	HAL_Delay(100);
 	Oled_SetPower(handle, 0);
 
     Oled_WriteCommand(handle, 0x20); //Set Memory Addressing Mode
@@ -135,7 +135,7 @@ void Oled_Init(struct Oled_Handle* handle) {
     Oled_WriteCommand(handle, 0x14); //
     Oled_SetPower(handle, 1); //--turn on SSD1306 panel
 
-    Oled_Fill(handle, Oled_Black);
+    Oled_Fill(handle, Oled_ColorBlack);
 }
 
 void Oled_Update(struct Oled_Handle* handle) {
