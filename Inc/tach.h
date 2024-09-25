@@ -2,7 +2,7 @@
 #define INC_TACH_H_
 
 #include "stdint.h"
-#include "main.h"
+#include "platform.h"
 
 struct Tach_Handle {
 	// configuration

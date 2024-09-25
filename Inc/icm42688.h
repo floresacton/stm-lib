@@ -2,8 +2,8 @@
 #define INC_ICM42688_H_
 
 #include "stdint.h"
-#include "main.h"
 #include "algebra.h"
+#include "platform.h"
 
 #define ICM42688_ID 0b01000111
 

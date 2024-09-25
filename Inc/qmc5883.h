@@ -2,8 +2,8 @@
 #define INC_QMC5883_H_
 
 #include "stdint.h"
-#include "main.h"
 #include "algebra.h"
+#include "platform.h"
 
 #define QMC5883_ADDRESS 0x1A
 #define QMC5883_ID 0xFF

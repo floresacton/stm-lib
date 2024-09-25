@@ -2,7 +2,7 @@
 #define INC_DAC_H_
 
 #include "stdint.h"
-#include "main.h"
+#include "platform.h"
 
 struct Dac_Handle {
 	// configuration

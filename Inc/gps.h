@@ -2,8 +2,8 @@
 #define INC_GPS_H_
 
 #include "stdint.h"
-#include "main.h"
 #include "nmea.h"
+#include "platform.h"
 
 struct Gps_Handle {
 	// configuration

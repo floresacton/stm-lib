@@ -1,6 +1,6 @@
 #include "algebra.h"
-#include "math.h"
 #include "string.h"
+#include "platform.h"
 
 float Algebra_Sqrt(float val) {
 	return sqrt(val);

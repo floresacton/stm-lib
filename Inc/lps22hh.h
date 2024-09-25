@@ -2,7 +2,7 @@
 #define INC_LPS22HH_H_
 
 #include "stdint.h"
-#include "main.h"
+#include "platform.h"
 
 #define LPS22HH_DATA_SIZE 5
 #define LPS22HH_BUF_SIZE LPS22HH_COUNT*LPS22HH_DATA_SIZE

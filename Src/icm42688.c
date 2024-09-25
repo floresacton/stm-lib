@@ -1,8 +1,8 @@
 #include "icm42688.h"
-#include "main.h"
 #include "stdlib.h"
 #include "string.h"
 #include "algebra.h"
+#include "platform.h"
 
 static void icm42688_write_register(struct Icm42688_Handle* handle, uint8_t reg, uint8_t data) {
 	HAL_GPIO_WritePin(handle->csPort, handle->csPin, 0);

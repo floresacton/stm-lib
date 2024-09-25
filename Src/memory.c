@@ -1,7 +1,7 @@
 #include "memory.h"
 #include "eeprom.h"
-#include "stm32g4xx_hal.h"
 #include "stdlib.h"
+#include "platform.h"
 
 void Memory_Init(struct Memory_Handle* handle) {
 	for (uint8_t i = 0; i < handle->count; i++) {

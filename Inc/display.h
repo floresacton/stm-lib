@@ -1,8 +1,8 @@
 #ifndef INC_DISPLAY_H_
 #define INC_DISPLAY_H_
 
-#include "app.h"
 #include "memory.h"
+#include "platform.h"
 
 struct Display_Screen;
 
