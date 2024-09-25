@@ -1,2 +1,2 @@
-# arm-lib
-Arm Cortex-M Library Modules
+# stm-lib
+Stm32 Library Modules
