@@ -1,7 +1,6 @@
 #include "button.h"
 #include "stdlib.h"
 #include "string.h"
-#include "platform.h"
 
 void Button_Init(struct Button_Handle* handle) {
 	handle->pressed = malloc(handle->count);

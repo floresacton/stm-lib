@@ -1,8 +1,6 @@
 #include "icm42688.h"
 #include "stdlib.h"
 #include "string.h"
-#include "algebra.h"
-#include "platform.h"
 
 static void icm42688_write_register(struct Icm42688_Handle* handle, uint8_t reg, uint8_t data) {
 	HAL_GPIO_WritePin(handle->csPort, handle->csPin, 0);
@@ -113,30 +111,6 @@ uint8_t Icm42688_ExtFlag(struct Icm42688_Handle* handle, uint16_t pin) {
 void Icm42688_ExtHandler(struct Icm42688_Handle* handle) {
 	if (handle->init) {
 		icm42688_read_registers(handle, ICM42688_REG_FIFO_DATA, handle->data, 20);
-//		if ((data[0] >> 4) & 1) {
-//			int16_t accel[3];
-//			int16_t gyro[3];
-//			memcpy(accel, data+1, 6);
-//			memcpy(gyro, data+7, 6);
-//			int32_t aVal[3] = {accel[0], accel[1], accel[2]};
-//			int32_t gVal[3] = {gyro[1], gyro[1], gyro[2]};
-//			aVal[0] = (aVal[0] << 4) | (data[17] >> 4);
-//			aVal[1] = (aVal[1] << 4) | (data[18] >> 4);
-//			aVal[2] = (aVal[2] << 4) | (data[19] >> 4);
-//			gVal[0] = (gVal[0] << 4) | (data[17] & 0x0f);
-//			gVal[1] = (gVal[1] << 4) | (data[18] & 0x0f);
-//			gVal[2] = (gVal[2] << 4) | (data[19] & 0x0f);
-//			struct Vector3f aVec = {.x = aVal[0]>>2, .y = aVal[1]>>2, .z = aVal[2]>>2};
-//			struct Vector3f gVec = {.x = gVal[0]>>1, .y = gVal[1]>>1, .z = gVal[2]>>1};
-//			memcpy(handle->accel, &aVec, sizeof(struct Vector3f));
-//			memcpy(handle->gyro, &gVec, sizeof(struct Vector3f));
-//			// parse packet here
-//		}else{
-//			Error_Handler();
-//		}
-		// since rtc mode = 0 (no external clock)
-		// and timestamp resolution is 1us
-		// fifo should read 937 and 938 (read section 12.7)
 	}
 }
 

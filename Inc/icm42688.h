@@ -2,8 +2,7 @@
 #define INC_ICM42688_H_
 
 #include "stdint.h"
-#include "algebra.h"
-#include "platform.h"
+#include "main.h"
 
 #define ICM42688_ID 0b01000111
 
@@ -321,11 +320,6 @@ struct Icm42688_Handle {
 
 	uint16_t intPin;
 
-//	struct Vector3f* aBias;
-//	struct Vector3f* aScale;
-//
-//	struct Vector3f* gBias;
-//	struct Vector3f* gScale;
     // internal
     uint8_t init;
 

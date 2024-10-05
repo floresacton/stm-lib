@@ -2,7 +2,7 @@
 #define INC_LPS22HH_H_
 
 #include "stdint.h"
-#include "platform.h"
+#include "main.h"
 
 #define LPS22HH_DATA_SIZE 5
 #define LPS22HH_BUF_SIZE LPS22HH_COUNT*LPS22HH_DATA_SIZE
@@ -88,7 +88,6 @@ struct Lps22hh_Handle {
 
 void Lps22hh_Init(struct Lps22hh_Handle* handle);
 
-// functions for easily interfacing into main program
 uint8_t Lps22hh_ExtFlag(struct Lps22hh_Handle* handle, uint16_t pin);
 void Lps22hh_ExtHandler(struct Lps22hh_Handle* handle);
 
@@ -97,27 +96,5 @@ void Lps22hh_Reset(struct Lps22hh_Handle* handle);
 void Lps22hh_SetODR(struct Lps22hh_Handle* handle, enum Lps22hh_Odr odr);
 void Lps22hh_SetFilter(struct Lps22hh_Handle* handle, enum Lps22hh_Filt filter);
 void Lps22hh_SetInterrupt(struct Lps22hh_Handle* handle, uint8_t state);
-
-// example usage with STM32 HAL
-/*
-extern SPI_HandleTypeDef hspi1;
-static struct Lps22hh_Handle pressure = {.hspi = &hspi1, .csPin = , .csPort = , .intPin = DRDYP_Pin};
-
-void init() {
-	Lps22hh_Init(&pressure);
-}
-
-void loop() {
-	do whatever you want with
-	pressure.data
-
-	it holds info in 5 bytes
-	3 bytes for pressure and 2 for temperature
-	pr[0], pr[1], pr[2], tmp[0], tmp[1]
-
-	You can either send bytes to computer
-	or parse them directly on the microcontroller
-}
-*/
 
 #endif

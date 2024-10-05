@@ -2,7 +2,7 @@
 #define INC_EEPROM_H_
 
 #include "stdint.h"
-#include "platform.h"
+#include "main.h"
 
 struct Eeprom_Handle {
 	// configuration

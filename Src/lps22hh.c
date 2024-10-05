@@ -1,7 +1,6 @@
 #include "lps22hh.h"
 #include "string.h"
 #include "stdlib.h"
-#include "platform.h"
 
 static void lps22hh_write_register(struct Lps22hh_Handle* handle, uint8_t reg, uint8_t data) {
 	HAL_GPIO_WritePin(handle->csPort, handle->csPin, 0);

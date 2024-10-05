@@ -1,7 +1,6 @@
 #include "tach.h"
 #include "stdlib.h"
 #include "string.h"
-#include "platform.h"
 
 void Tach_Init(struct Tach_Handle* handle) {
 	handle->rpm = malloc(handle->channelCount * 2);

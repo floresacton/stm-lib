@@ -1,5 +1,4 @@
 #include "eeprom.h"
-#include "platform.h"
 
 void Eeprom_Read(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len) {
 	HAL_I2C_Mem_Read(handle->hi2c, handle->address, address, I2C_MEMADD_SIZE_16BIT, buf, len, HAL_MAX_DELAY);

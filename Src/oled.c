@@ -1,7 +1,6 @@
 #include "oled.h"
 #include "string.h"
 #include "stdlib.h"
-#include "platform.h"
 
 void Oled_Reset(struct Oled_Handle* handle) {
 	if (handle->hspi) {

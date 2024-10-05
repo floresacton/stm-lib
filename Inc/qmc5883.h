@@ -2,8 +2,7 @@
 #define INC_QMC5883_H_
 
 #include "stdint.h"
-#include "algebra.h"
-#include "platform.h"
+#include "main.h"
 
 #define QMC5883_ADDRESS 0x1A
 #define QMC5883_ID 0xFF
@@ -60,14 +59,10 @@ struct Qmc5883_Handle {
     // temperature is only relative
     uint8_t readTemp;
 
-//    struct Vector3f* bias;
-//    struct Transform3f* transform;
-
     // internal
     uint8_t init;
 
     uint8_t* data;
-//    struct Vector3f* vec;
 };
 
 void Qmc5883_Init(struct Qmc5883_Handle* handle);

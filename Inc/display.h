@@ -2,7 +2,7 @@
 #define INC_DISPLAY_H_
 
 #include "memory.h"
-#include "platform.h"
+#include "main.h"
 
 struct Display_Screen;
 

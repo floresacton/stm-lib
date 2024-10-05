@@ -6,7 +6,6 @@
 #include "button.h"
 #include "bitmap.h"
 #include "font.h"
-#include "platform.h"
 
 static uint8_t display_int_max(uint8_t a, uint8_t b) {
 	if (a > b) {

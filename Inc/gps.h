@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 #include "nmea.h"
-#include "platform.h"
+#include "main.h"
 
 struct Gps_Handle {
 	// configuration

@@ -1,9 +1,8 @@
 #include "gps.h"
+#include "usbd_cdc_if.h"
 #include "stdlib.h"
 #include "string.h"
 #include "nmea.h"
-#include "usbd_cdc_if.h"
-#include "platform.h"
 
 static void gps_start_dma(struct Gps_Handle* handle) {
 	HAL_UARTEx_ReceiveToIdle_DMA(handle->huart, handle->rxBuf, handle->rxBufSize);

@@ -3,7 +3,7 @@
 
 #include "stdint.h"
 #include "font.h"
-#include "platform.h"
+#include "main.h"
 
 #define OLED_REG_CONTRAST 0x81
 

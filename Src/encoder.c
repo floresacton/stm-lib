@@ -1,5 +1,4 @@
-#include <encoder.h>
-#include "main.h"
+#include "encoder.h"
 
 void Encoder_Init(struct Encoder_Handle* handle) {
 	handle->aLasts = malloc(handle->count);

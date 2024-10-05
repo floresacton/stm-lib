@@ -1,8 +1,6 @@
 #include "qmc5883.h"
 #include "string.h"
 #include "stdlib.h"
-#include "algebra.h"
-#include "platform.h"
 
 static void qmc5883_write_register(struct Qmc5883_Handle* handle, uint8_t reg, uint8_t data) {
 	HAL_I2C_Mem_Write(handle->hi2c, QMC5883_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, &data, 1, HAL_MAX_DELAY);

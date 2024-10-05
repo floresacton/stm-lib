@@ -2,7 +2,7 @@
 #define INC_BUTTON_H_
 
 #include "stdint.h"
-#include "platform.h"
+#include "main.h"
 
 struct Button_Handle {
 	// configuration
