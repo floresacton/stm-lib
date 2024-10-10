@@ -5,26 +5,22 @@
 
 struct Encoder_Handle {
 	// configuration
-	TIM_HandleTypeDef* htim; // 20khz
-
-	GPIO_TypeDef** aPorts;
-	uint16_t* aPins;
-	GPIO_TypeDef** bPorts;
-	uint16_t* bPins;
-
-	uint8_t count;
+	GPIO_TypeDef* aPort;
+	uint16_t aPin;
+	GPIO_TypeDef* bPort;
+	uint16_t bPin;
 
 	// internal
-	uint8_t* aLasts;
-	uint8_t* bLasts;
+	uint8_t aLast;
+	uint8_t bLast;
 
-	int32_t* positions;
+	int32_t pos;
 };
 
 void Encoder_Init(struct Encoder_Handle* handle);
 
-void Encoder_TimHandler(struct Encoder_Handle* handle);
-uint8_t Encoder_TimFlag(struct Encoder_Handle* handle, TIM_HandleTypeDef *htim);
+// recommended 2 * (state changes / sec)
+void Encoder_Update(struct Encoder_Handle* handle);
 
 #endif
 
