@@ -14,6 +14,7 @@ struct Drv8876_Handle {
     TIM_HandleTypeDef* cTim;
     uint32_t cChan;
 
+    uint8_t dir;
     uint8_t max;
 };
 

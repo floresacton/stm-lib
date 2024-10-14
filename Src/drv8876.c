@@ -26,6 +26,9 @@ void Drv8876_SetCurrent(struct Drv8876_Handle* handle, uint8_t current) {
 
 void Drv8876_SetVoltage(struct Drv8876_Handle* handle, float voltage) {
     const uint8_t max = handle->max;
+	if (handle->dir) {
+		voltage = -voltage;
+	}
 	__HAL_TIM_SET_COMPARE(handle->aTim, handle->aChan, motor_clamp(voltage, max));
 	__HAL_TIM_SET_COMPARE(handle->bTim, handle->bChan, motor_clamp(-voltage, max));
 }

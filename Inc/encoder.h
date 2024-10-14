@@ -10,6 +10,8 @@ struct Encoder_Handle {
 	GPIO_TypeDef* bPort;
 	uint16_t bPin;
 
+	uint8_t dir;
+
 	// internal
 	uint8_t aLast;
 	uint8_t bLast;
