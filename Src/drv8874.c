@@ -1,4 +1,4 @@
-#include "drv8876.h"
+#include "drv8874.h"
 
 static int8_t motor_clamp(float val, uint8_t max) {
 	if (val < 0) {
@@ -10,7 +10,7 @@ static int8_t motor_clamp(float val, uint8_t max) {
 	return val;
 }
 
-void Drv8876_Init(struct Drv8876_Handle* handle) {
+void Drv8874_Init(struct Drv8874_Handle* handle) {
     HAL_TIM_PWM_Start(handle->aTim, handle->aChan);
     HAL_TIM_PWM_Start(handle->bTim, handle->bChan);
     HAL_TIM_PWM_Start(handle->cTim, handle->cChan);
@@ -20,11 +20,11 @@ void Drv8876_Init(struct Drv8876_Handle* handle) {
     __HAL_TIM_SET_COMPARE(handle->cTim, handle->cChan, 0);
 }
 
-void Drv8876_SetCurrent(struct Drv8876_Handle* handle, uint8_t current) {
+void Drv8874_SetCurrent(struct Drv8874_Handle* handle, uint8_t current) {
 	__HAL_TIM_SET_COMPARE(handle->cTim, handle->cChan, current);
 }
 
-void Drv8876_SetVoltage(struct Drv8876_Handle* handle, float voltage) {
+void Drv8874_SetVoltage(struct Drv8874_Handle* handle, float voltage) {
     const uint8_t max = handle->max;
 	if (handle->dir) {
 		voltage = -voltage;
