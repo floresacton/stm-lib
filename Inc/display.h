@@ -38,7 +38,7 @@ struct Display_Screen {
 struct Display_Handle {
 	// configuration
 	struct Oled_Handle* oled;
-	struct Button_Handle* buttons;
+	struct Button_Handle** buttons;
 	struct Memory_Handle* memory;
 
 	struct Display_Screen* top;

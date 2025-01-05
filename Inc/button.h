@@ -2,6 +2,7 @@
 #define INC_BUTTON_H_
 
 #include "stdint.h"
+#include "stdbool.h"
 #include "main.h"
 
 struct Button_Handle {
@@ -10,8 +11,8 @@ struct Button_Handle {
     uint16_t pin;
 
     // internal
-    uint8_t lastState;
-    uint8_t pressed;
+    bool lastState;
+    bool pressed;
 };
 
 void Button_Init(struct Button_Handle* handle);

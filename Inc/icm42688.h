@@ -4,7 +4,7 @@
 #include "stdint.h"
 #include "main.h"
 
-#define ICM42688_ID 0b01000111
+#define ICM42688_ID 0x47 // 0b01000111
 
 //bank 0
 #define ICM42688_REG_DEVICE_CONFIG 0x11 //r-w

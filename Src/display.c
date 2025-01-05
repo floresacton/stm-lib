@@ -88,7 +88,7 @@ void Display_Init(struct Display_Handle* handle) {
 // button order is up, down, enter, back
 void Display_Update(struct Display_Handle* handle) {
 	if (handle->current->optionCount) {
-		if (handle->buttons->pressed[0]) {
+		if (handle->buttons[0]->pressed) {
 			if (handle->current->select == handle->current->scroll && handle->current->optionCount > 3) {
 				if (!handle->current->select) {
 					handle->current->select = handle->current->optionCount - 1;
@@ -107,7 +107,7 @@ void Display_Update(struct Display_Handle* handle) {
 				}
 				display_update_cursor(handle);
 			}
-		}else if (handle->buttons->pressed[1]) {
+		}else if (handle->buttons[1]->pressed) {
 			if (handle->current->select == handle->current->scroll + 2 && handle->current->optionCount > 3) {
 				if (handle->current->select == handle->current->optionCount - 1) {
 					handle->current->select = 0;
@@ -126,7 +126,7 @@ void Display_Update(struct Display_Handle* handle) {
 				}
 				display_update_cursor(handle);
 			}
-		}else if (handle->buttons->pressed[2]) {
+		}else if (handle->buttons[2]->pressed) {
 			if (handle->current->options[handle->current->select].redirect) {
 				handle->stackIndex++;
 				handle->stack[handle->stackIndex] = handle->current->options[handle->current->select].redirect;
@@ -139,7 +139,7 @@ void Display_Update(struct Display_Handle* handle) {
 			}else if (handle->current->options[handle->current->select].action) {
 				(*handle->current->options[handle->current->select].action)();
 			}
-		}else if (handle->buttons->pressed[3]) {
+		}else if (handle->buttons[3]->pressed) {
 			handle->current->scroll = 0;
 			handle->current->select = 0;
 			if (handle->stackIndex > 0) {
@@ -151,19 +151,19 @@ void Display_Update(struct Display_Handle* handle) {
 		}
 		Oled_Update(handle->oled);
 	} else if (handle->current->var) {
-		if (handle->buttons->pressed[0]) {
+		if (handle->buttons[0]->pressed) {
 			handle->current->var->value += handle->editValue;
 			if (handle->current->var->value > handle->current->var->max) {
 				handle->current->var->value = handle->current->var->max;
 			}
 			display_update_variable(handle);
-		}else if (handle->buttons->pressed[1]) {
+		}else if (handle->buttons[1]->pressed) {
 			handle->current->var->value -= handle->editValue;
 			if (handle->current->var->value < handle->current->var->min) {
 				handle->current->var->value = handle->current->var->min;
 			}
 			display_update_variable(handle);
-		}else if (handle->buttons->pressed[2]) {
+		}else if (handle->buttons[2]->pressed) {
 			handle->editDigit++;
 			if (handle->editDigit > handle->current->var->maxDigit) {
 				handle->editDigit = handle->current->var->minDigit;
@@ -176,7 +176,7 @@ void Display_Update(struct Display_Handle* handle) {
 				handle->editValue /= 10.0;
 			}
 			display_update_edit(handle);
-		}else if (handle->buttons->pressed[3]) {
+		}else if (handle->buttons[3]->pressed) {
 			Memory_Save(handle->memory, handle->current->var);
 			handle->stackIndex--;
 			display_init_screen(handle);
@@ -190,13 +190,13 @@ void Display_Update(struct Display_Handle* handle) {
 			handle->stackIndex++;
 			display_init_screen(handle);
 		}
-		if (handle->buttons->pressed[3]) {
+		if (handle->buttons[3]->pressed) {
 			handle->stackIndex--;
 			display_init_screen(handle);
 		}
 		Oled_Update(handle->oled);
 	}
 	for (uint8_t i = 0; i < 4; i++) {
-		handle->buttons->pressed[i] = 0;
+		handle->buttons[i]->pressed = 0;
 	}
 }
