@@ -6,7 +6,7 @@
 #include "main.h"
 
 struct Button_Handle {
-	// configuration
+    // configuration
     GPIO_TypeDef* port;
     uint16_t pin;
 

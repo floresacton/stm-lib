@@ -7,10 +7,10 @@
 #define FONT_START 32
 
 struct Font {
-	const uint16_t width;
-	const uint16_t height;
-	const uint8_t scale; // width (bytes)
-	const uint8_t *data;
+    const uint16_t width;
+    const uint16_t height;
+    const uint8_t scale; // width (bytes)
+    const uint8_t *data;
 };
 
 extern const struct Font Font_7x10;

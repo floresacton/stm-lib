@@ -5,8 +5,6 @@
 #include "font.h"
 #include "main.h"
 
-#define OLED_REG_CONTRAST 0x81
-
 enum Oled_Color {
     Oled_ColorBlack = 0x00u,
     Oled_ColorWhite = 0xFFu,
@@ -66,7 +64,7 @@ void Oled_SetCursor(struct Oled_Handle* oled, uint16_t x, uint16_t y);
 void Oled_DrawChar(struct Oled_Handle* oled, char chr, const struct Font* font);
 void Oled_DrawString(struct Oled_Handle* oled, const char *str, const struct Font* font);
 void Oled_DrawBitmap(struct Oled_Handle* oled, uint16_t x, uint16_t y, const uint8_t* bitmap,
-		uint16_t w, uint16_t h);
+        uint16_t w, uint16_t h);
 
 void Oled_ClearPixel(struct Oled_Handle* oled, uint16_t x, uint16_t y);
 void Oled_ClearRectangle(struct Oled_Handle* oled, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);

@@ -55,24 +55,24 @@
 #define LPS22HH_REG_FIFO_DATA_OUT_TEMP_H 0x7C //r
 
 enum Lps22hh_Odr {
-	Lps22hh_OdrOnce = 0u,
-	Lps22hh_Odr1 = 1u,
-	Lps22hh_Odr10 = 2u,
-	Lps22hh_Odr25 = 3u,
-	Lps22hh_Odr50 = 4u,
-	Lps22hh_Odr75 = 5u,
-	Lps22hh_Odr100 = 6u,
-	Lps22hh_Odr200 = 7u,
+    Lps22hh_OdrOnce = 0u,
+    Lps22hh_Odr1 = 1u,
+    Lps22hh_Odr10 = 2u,
+    Lps22hh_Odr25 = 3u,
+    Lps22hh_Odr50 = 4u,
+    Lps22hh_Odr75 = 5u,
+    Lps22hh_Odr100 = 6u,
+    Lps22hh_Odr200 = 7u,
 };
 
 enum Lps22hh_Filt {
-	Lps22hh_Filt2 = 0u,
-	Lps22hh_Filt9 = 2u,
-	Lps22hh_Filt20 = 3u,
+    Lps22hh_Filt2 = 0u,
+    Lps22hh_Filt9 = 2u,
+    Lps22hh_Filt20 = 3u,
 };
 
 struct Lps22hh_Handle {
-	// configuration
+    // configuration
     SPI_HandleTypeDef* hspi;//10Mhz max
 
     GPIO_TypeDef* csPort;

@@ -7,54 +7,54 @@
 struct Display_Screen;
 
 struct Display_Option {
-	// configuration
-	char* text;
-	// redirect
-	struct Display_Screen* redirect;
-	// toggle
-	struct Memory_Variable* var;
-	char* on;
-	char* off;
-	// action
-	void (*action)(void);
+    // configuration
+    char* text;
+    // redirect
+    struct Display_Screen* redirect;
+    // toggle
+    struct Memory_Variable* var;
+    char* on;
+    char* off;
+    // action
+    void (*action)(void);
 };
 
 struct Display_Screen {
-	// configuration
-	// scroll
-	uint8_t optionCount;
-	struct Display_Option* options;
-	// edit
-	struct Memory_Variable* var;
-	// live
-	void (*update)(void);
-	struct Display_Screen* redirect;
+    // configuration
+    // scroll
+    uint8_t optionCount;
+    struct Display_Option* options;
+    // edit
+    struct Memory_Variable* var;
+    // live
+    void (*update)(void);
+    struct Display_Screen* redirect;
 
-	// internal
-	uint8_t select;
-	uint8_t scroll;
+    // internal
+    uint8_t select;
+    uint8_t scroll;
 };
 
 struct Display_Handle {
-	// configuration
-	struct Oled_Handle* oled;
-	struct Button_Handle** buttons;
-	struct Memory_Handle* memory;
+    // configuration
+    struct Oled_Handle* oled;
+    struct Button_Handle** buttons;
+    struct Memory_Handle* memory;
 
-	struct Display_Screen* top;
-	uint8_t depth;
+    struct Display_Screen* top;
+    uint8_t depth;
 
-	uint8_t chars;
+    uint8_t chars;
 
-	// internal
-	uint8_t stackIndex;
-	struct Display_Screen **stack;
-	struct Display_Screen *current;
+    // internal
+    uint8_t stackIndex;
+    struct Display_Screen **stack;
+    struct Display_Screen *current;
 
-	char* charBuf;
+    char* charBuf;
 
-	int8_t editDigit;
-	float editValue;
+    int8_t editDigit;
+    float editValue;
 };
 
 void Display_Init(struct Display_Handle* handle);

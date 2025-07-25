@@ -5,7 +5,7 @@
 #include "main.h"
 
 struct Eeprom_Handle {
-	// configuration
+    // configuration
     I2C_HandleTypeDef* hi2c;
     uint8_t address;
 

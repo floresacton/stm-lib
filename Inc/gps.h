@@ -6,7 +6,7 @@
 #include "main.h"
 
 struct Gps_Handle {
-	// configuration
+    // configuration
     UART_HandleTypeDef* huart;
     DMA_HandleTypeDef* hdma;
 

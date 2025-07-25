@@ -1,13 +1,13 @@
 #include "drv8874.h"
 
 static int8_t motor_clamp(float val, uint8_t max) {
-	if (val < 0) {
-		return 0;
-	}
-	if (val > max) {
-		return max;
-	}
-	return val;
+    if (val < 0) {
+        return 0;
+    }
+    if (val > max) {
+        return max;
+    }
+    return val;
 }
 
 void Drv8874_Init(struct Drv8874_Handle* handle) {
@@ -21,14 +21,14 @@ void Drv8874_Init(struct Drv8874_Handle* handle) {
 }
 
 void Drv8874_SetCurrent(struct Drv8874_Handle* handle, uint8_t current) {
-	__HAL_TIM_SET_COMPARE(handle->cTim, handle->cChan, current);
+    __HAL_TIM_SET_COMPARE(handle->cTim, handle->cChan, current);
 }
 
 void Drv8874_SetVoltage(struct Drv8874_Handle* handle, float voltage) {
     const uint8_t max = handle->max;
-	if (handle->dir) {
-		voltage = -voltage;
-	}
-	__HAL_TIM_SET_COMPARE(handle->aTim, handle->aChan, motor_clamp(voltage, max));
-	__HAL_TIM_SET_COMPARE(handle->bTim, handle->bChan, motor_clamp(-voltage, max));
+    if (handle->dir) {
+        voltage = -voltage;
+    }
+    __HAL_TIM_SET_COMPARE(handle->aTim, handle->aChan, motor_clamp(voltage, max));
+    __HAL_TIM_SET_COMPARE(handle->bTim, handle->bChan, motor_clamp(-voltage, max));
 }

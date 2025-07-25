@@ -28,31 +28,31 @@
 #define QMC5883_REG_CHIP_ID 0x0D //r
 
 enum Qmc5883_Mode {
-	Qmc5883_ModeStandby = 0u,
-	Qmc5883_ModeCont = 1u,
+    Qmc5883_ModeStandby = 0u,
+    Qmc5883_ModeCont = 1u,
 };
 
 enum Qmc5883_Odr {
-	Qmc5883_Odr10 = 0u,
-	Qmc5883_Odr50 = 1u,
-	Qmc5883_Odr100 = 2u,
-	Qmc5883_Odr200 = 3u,
+    Qmc5883_Odr10 = 0u,
+    Qmc5883_Odr50 = 1u,
+    Qmc5883_Odr100 = 2u,
+    Qmc5883_Odr200 = 3u,
 };
 
 enum Qmc5883_Scale {
-	Qmc5883_Scale2G = 0u,
-	Qmc5883_Scale8G = 1u,
+    Qmc5883_Scale2G = 0u,
+    Qmc5883_Scale8G = 1u,
 };
 
 enum Qmc5883_Osr {
-	Qmc5883_Osr512 = 0u,
-	Qmc5883_Osr256 = 1u,
-	Qmc5883_Osr128 = 2u,
-	Qmc5883_Osr64 = 3u,
+    Qmc5883_Osr512 = 0u,
+    Qmc5883_Osr256 = 1u,
+    Qmc5883_Osr128 = 2u,
+    Qmc5883_Osr64 = 3u,
 };
 
 struct Qmc5883_Handle {
-	// configuration
+    // configuration
     I2C_HandleTypeDef* hi2c;
     uint16_t intPin;
 

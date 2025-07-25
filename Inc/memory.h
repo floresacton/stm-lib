@@ -5,29 +5,29 @@
 #include "eeprom.h"
 
 struct Memory_Variable {
-	// configuration
-	float reset;
+    // configuration
+    float reset;
 
-	float min;
-	float max;
+    float min;
+    float max;
 
-	int8_t minDigit; // can be negative
+    int8_t minDigit; // can be negative
 
-	// internal
-	int8_t maxDigit;
+    // internal
+    int8_t maxDigit;
 
-	float value;
-	uint16_t address;
+    float value;
+    uint16_t address;
 };
 
 struct Memory_Handle {
-	// configuration
-	struct Eeprom_Handle* eeprom;
+    // configuration
+    struct Eeprom_Handle* eeprom;
 
-	float hash;
+    float hash;
 
-	struct Memory_Variable** vars;
-	uint8_t count;
+    struct Memory_Variable** vars;
+    uint8_t count;
 };
 
 void Memory_Init(struct Memory_Handle* handle);

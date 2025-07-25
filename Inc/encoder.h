@@ -4,19 +4,19 @@
 #include "main.h"
 
 struct Encoder_Handle {
-	// configuration
-	GPIO_TypeDef* aPort;
-	uint16_t aPin;
-	GPIO_TypeDef* bPort;
-	uint16_t bPin;
+    // configuration
+    GPIO_TypeDef* aPort;
+    uint16_t aPin;
+    GPIO_TypeDef* bPort;
+    uint16_t bPin;
 
-	uint8_t dir;
+    uint8_t dir;
 
-	// internal
-	uint8_t aLast;
-	uint8_t bLast;
+    // internal
+    uint8_t aLast;
+    uint8_t bLast;
 
-	int32_t pos;
+    int32_t pos;
 };
 
 void Encoder_Init(struct Encoder_Handle* handle);

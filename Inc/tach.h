@@ -5,7 +5,7 @@
 #include "main.h"
 
 struct Tach_Handle {
-	// configuration
+    // configuration
     uint32_t countFreq; // freq of Tach_Count
 
     uint8_t spokes;

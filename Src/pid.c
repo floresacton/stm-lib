@@ -13,12 +13,12 @@ float Pid_Update(struct Pid_Handle* handle, float current) {
     const float p = handle->kp*err;
 
     handle->errInt += err;
-	const float i = handle->ki*handle->errInt;
+    const float i = handle->ki*handle->errInt;
 
-	const float d = handle->kd*(err - handle->errPrev);
-	handle->errPrev = err;
+    const float d = handle->kd*(err - handle->errPrev);
+    handle->errPrev = err;
 
-	return p+i+d;
+    return p+i+d;
 }
 
 void Pid_Reset(struct Pid_Handle* handle) {
