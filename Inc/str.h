@@ -4,7 +4,7 @@
 #include "stdint.h"
 
 //returns if strings match to len characters
-uint8_t Str_Comp(char* str1, char* str2, const uint8_t len);
+uint8_t Str_Equal(char* str1, char* str2, const uint8_t len);
 
 //returns the char* at found character
 //or end if not found

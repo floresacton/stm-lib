@@ -13,8 +13,6 @@ struct Display_Option {
     struct Display_Screen* redirect;
     // toggle
     struct Memory_Variable* var;
-    char* on;
-    char* off;
     // action
     void (*action)(void);
 };
@@ -27,7 +25,7 @@ struct Display_Screen {
     // edit
     struct Memory_Variable* var;
     // live
-    void (*update)(void);
+    uint8_t (*update)(void);
     struct Display_Screen* redirect;
 
     // internal

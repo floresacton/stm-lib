@@ -35,6 +35,6 @@ void Memory_Init(struct Memory_Handle* handle);
 void Memory_Reset(struct Memory_Handle* handle);
 void Memory_Save(struct Memory_Handle* handle, struct Memory_Variable* var);
 
-void Memory_Print(struct Memory_Variable* var, char* buf);
+uint8_t Memory_Print(char* buf, struct Memory_Variable* var);
 
 #endif

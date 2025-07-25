@@ -1,7 +1,7 @@
 #include "str.h"
 #include "stdint.h"
 
-uint8_t Str_Comp(char* str1, char* str2, uint8_t len) {
+uint8_t Str_Equal(char* str1, char* str2, uint8_t len) {
     for (uint8_t i = 0; i < len; i++) {
         if (*str1 != *str2) {
             return 0;

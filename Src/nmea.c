@@ -127,7 +127,7 @@ static void nmea_parse_msg(struct Nmea_Handle* handle, char* start, char* end) {
     uint8_t count = 0;
     char* msg = NULL;
     for (uint8_t m = 0; m < NMEA_MESSAGE_COUNT; m++) {
-        if (Str_Comp(start, messages[m], 3)) {
+        if (Str_Equal(start, messages[m], 3)) {
             start += 3;
             for (; start < end; start++) {
                 if (*start == ',') {

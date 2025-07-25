@@ -28,9 +28,9 @@ static void display_update_options(struct Display_Handle* handle) {
             Oled_DrawString(handle->oled, handle->current->options[handle->current->scroll+i].text, &Font_7x10);
             if (handle->current->options[handle->current->scroll+i].var) {
                 if (handle->current->options[handle->current->scroll+i].var->value) {
-                    Oled_DrawString(handle->oled, handle->current->options[handle->current->scroll+i].on, &Font_7x10);
+                    Oled_DrawString(handle->oled, "[ON]", &Font_7x10);
                 }else{
-                    Oled_DrawString(handle->oled, handle->current->options[handle->current->scroll+i].off, &Font_7x10);
+                    Oled_DrawString(handle->oled, "[OFF]", &Font_7x10);
                 }
             }
         }
@@ -57,7 +57,7 @@ static void display_update_edit(struct Display_Handle* handle) {
 static void display_update_variable(struct Display_Handle* handle) {
     Oled_ClearRectangle(handle->oled, 44, 34, 86, 44);
     Oled_SetCursor(handle->oled, 44, 34);
-    Memory_Print(handle->current->var, handle->charBuf);
+    Memory_Print(handle->charBuf, handle->current->var);
     Oled_DrawString(handle->oled, handle->charBuf, &Font_7x10);
 }
 
@@ -73,6 +73,8 @@ static void display_init_screen(struct Display_Handle* handle) {
 
         display_update_edit(handle);
         display_update_variable(handle);
+    } else if (handle->current->update) {
+
     }
 }
 
@@ -142,9 +144,7 @@ void Display_Update(struct Display_Handle* handle) {
         }else if (handle->buttons[3]->pressed) {
             handle->current->scroll = 0;
             handle->current->select = 0;
-            if (handle->stackIndex > 0) {
-                handle->stackIndex--;
-            }
+            handle->stackIndex--;
             display_init_screen(handle);
         }else{
             return;
@@ -185,14 +185,17 @@ void Display_Update(struct Display_Handle* handle) {
         }
         Oled_Update(handle->oled);
     } else if (handle->current->update) {
-        (*handle->current->update)();
-        if (handle->current->redirect) {
+        if (handle->buttons[2]->pressed && handle->current->redirect) {
             handle->stackIndex++;
+            handle->stack[handle->stackIndex] = handle->current->redirect;
             display_init_screen(handle);
-        }
-        if (handle->buttons[3]->pressed) {
-            handle->stackIndex--;
+        } else if (handle->buttons[3]->pressed) {
+            if (handle->stackIndex) {
+                handle->stackIndex--;
+            }
             display_init_screen(handle);
+        } else if (!(*handle->current->update)()) {
+            return;
         }
         Oled_Update(handle->oled);
     }
