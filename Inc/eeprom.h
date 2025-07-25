@@ -16,11 +16,11 @@ struct Eeprom_Handle {
 void Eeprom_Read(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len);
 uint8_t Eeprom_ReadByte(struct Eeprom_Handle* handle, uint16_t address);
 
-//wrap page
+//wraps on page
 void Eeprom_Write(struct Eeprom_Handle* handle, uint16_t address, uint8_t *buf, uint16_t len);
 void Eeprom_WriteByte(struct Eeprom_Handle* handle, uint16_t address, uint8_t val);
 
-//wrap memory
+//wraps on memory
 void Eeprom_ReadNext(struct Eeprom_Handle* handle, uint8_t *buf, uint8_t len);
 
 #endif
