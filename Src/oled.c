@@ -164,6 +164,31 @@ void Oled_DrawPixel(struct Oled_Handle* handle, uint16_t x, uint16_t y) {
     handle->buf[x + (y / 8) * handle->width] |= 1 << (y % 8);
 }
 
+void Oled_DrawLine(struct Oled_Handle* handle, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+    int16_t dx = abs((int16_t)x2 - (int16_t)x1);
+    int16_t sx = x1 < x2 ? 1 : -1;
+    int16_t dy = -abs((int16_t)y2 - (int16_t)y1);
+    int16_t sy = y1 < y2 ? 1 : -1;
+    int16_t err = dx + dy;  // error value
+
+    while (1) {
+        Oled_DrawPixel(handle, x1, y1);
+
+        if (x1 == x2 && y1 == y2)
+            break;
+
+        int16_t e2 = 2 * err;
+        if (e2 >= dy) {
+            err += dy;
+            x1 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
 void Oled_DrawHorizontalLine(struct Oled_Handle* handle, uint8_t x1, uint8_t x2, uint8_t y) {
     const uint8_t mask = 1 << (y % 8);
     const uint16_t offset = (y / 8) * handle->width;

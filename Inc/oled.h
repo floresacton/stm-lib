@@ -58,6 +58,7 @@ void Oled_WriteBuffer(struct Oled_Handle* oled, uint8_t *buf, uint32_t len);
 
 void Oled_Fill(struct Oled_Handle* oled, enum Oled_Color color);
 void Oled_DrawPixel(struct Oled_Handle* oled, uint16_t x, uint16_t y);
+void Oled_DrawLine(struct Oled_Handle* oled, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void Oled_DrawHorizontalLine(struct Oled_Handle* oled, uint8_t x1, uint8_t x2, uint8_t y);
 void Oled_FillRectangle(struct Oled_Handle* oled, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void Oled_SetCursor(struct Oled_Handle* oled, uint16_t x, uint16_t y);

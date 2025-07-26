@@ -84,6 +84,8 @@ struct Lps22hh_Handle {
     uint8_t init;
 
     uint8_t* data;
+    float pressure;
+    float temperature;
 };
 
 void Lps22hh_Init(struct Lps22hh_Handle* handle);

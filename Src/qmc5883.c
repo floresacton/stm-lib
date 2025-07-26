@@ -1,6 +1,7 @@
 #include "qmc5883.h"
 #include "string.h"
 #include "stdlib.h"
+#include "math.h"
 
 static void qmc5883_write_register(struct Qmc5883_Handle* handle, uint8_t reg, uint8_t data) {
     HAL_I2C_Mem_Write(handle->hi2c, QMC5883_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, &data, 1, HAL_MAX_DELAY);
@@ -52,7 +53,22 @@ void Qmc5883_ExtHandler(struct Qmc5883_Handle* handle) {
         qmc5883_read_registers(handle, QMC5883_REG_X_OUT_L, handle->data, 6);
         if (handle->readTemp) {
             qmc5883_read_registers(handle, QMC5883_REG_TEMP_OUT_L, handle->data+6, 2);
+            
+            int16_t temp;
+            memcpy(&temp, handle->data+6, 2);
+            handle->temperature = (float)temp / 500.0f * 9.0f + 32.0f; // F
         }
+        int16_t x, y, z;
+        memcpy(&x, handle->data, 2);
+        memcpy(&y, handle->data+2, 2);
+        memcpy(&z, handle->data+4, 2);
+
+        handle->x = (float)x / 12000.0f;
+        handle->y = (float)y / 12000.0f;
+        handle->z = (float)z / 12000.0f;
+
+        handle->angle = atan2(handle->y, handle->z) - 3.1415927f / 2.0f;
+
 //      int16_t data[3];
 //      qmc5883_read_registers(handle, QMC5883_REG_X_OUT_L, (uint8_t*)data, 6);
 //      struct Vector3f vec = {.x = data[0], .y = data[1], .z = data[2]};

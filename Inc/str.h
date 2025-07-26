@@ -13,4 +13,6 @@ char* Str_To(char* msg, char* end, char delim);
 uint8_t Str_ParseByte(char* msg, char* end);
 float Str_ParseFloat(char* msg, char* end);
 
+uint8_t Str_PrintFloat(char* buf, float val, uint8_t decimals);
+
 #endif

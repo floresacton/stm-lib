@@ -46,6 +46,13 @@ void Lps22hh_Init(struct Lps22hh_Handle* handle) {
     Lps22hh_ExtHandler(handle);
 }
 
+uint8_t rev(uint8_t b) {
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
+}
+
 uint8_t Lps22hh_ExtFlag(struct Lps22hh_Handle* handle, uint16_t pin) {
     return handle->intPin == pin;
 }
@@ -53,6 +60,13 @@ uint8_t Lps22hh_ExtFlag(struct Lps22hh_Handle* handle, uint16_t pin) {
 void Lps22hh_ExtHandler(struct Lps22hh_Handle* handle) {
     if (handle->init) {
         lps22hh_read_registers(handle, LPS22HH_REG_PRESS_XL, handle->data, 5);
+        uint32_t pres = 0;
+        memcpy(&pres, handle->data, 3);
+        handle->pressure = (float)pres / 40960.0f; //kpa
+
+        int16_t temp = 0;
+        memcpy(&temp, handle->data+3, 2);
+        handle->temperature = (float)temp / 500.0f * 9.0f + 32.0f; // F
     }
 }
 

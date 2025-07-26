@@ -63,6 +63,10 @@ struct Qmc5883_Handle {
     uint8_t init;
 
     uint8_t* data;
+
+    float temperature;
+    float x, y, z;
+    float angle;
 };
 
 void Qmc5883_Init(struct Qmc5883_Handle* handle);

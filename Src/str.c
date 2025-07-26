@@ -53,3 +53,40 @@ float Str_ParseFloat(char* msg, char* end) {
     }
     return val;
 }
+
+uint8_t Str_PrintFloat(char* buf, float val, uint8_t decimals) {
+    const uint8_t neg = val < 0;
+    if (neg) {
+        buf[0] = '-';
+        val = -val;
+    }
+
+    for (uint8_t i = 0; i < decimals; i++) {
+        val *= 10;
+    }
+
+    uint32_t collect = (uint32_t)val;
+    char tbuf[10];
+    uint8_t i = 0;
+    while ((i <= decimals) || collect) {
+        tbuf[i] = '0' + (collect % 10);
+        collect /= 10;
+        i++;
+    }
+
+    const uint8_t iter = i + (decimals > 0);
+    const uint8_t end = iter + neg;
+    uint8_t j = 0;
+    for (i = 0; i < iter; i++) {
+        buf[end-1-i] = tbuf[j];
+        
+        if (i+1 == decimals) {
+            i++;
+            buf[end-i-1] = '.';
+        }
+        j++;
+    }
+
+    buf[end] = 0;
+    return end;
+}
