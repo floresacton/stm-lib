@@ -11,7 +11,7 @@ struct Memory_Variable {
     float min;
     float max;
 
-    int8_t minDigit; // can be negative
+    int8_t decimals; // can be negative
 
     // internal
     int8_t maxDigit;

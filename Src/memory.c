@@ -48,5 +48,5 @@ void Memory_Save(struct Memory_Handle* handle, struct Memory_Variable* var) {
 }
 
 uint8_t Memory_Print(char* buf, struct Memory_Variable* var) {
-    return Str_PrintFloat(buf, var->value, -var->minDigit);
+    return Str_PrintFloat(buf, var->value, var->decimals);
 }

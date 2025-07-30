@@ -166,7 +166,7 @@ void Display_Update(struct Display_Handle* handle) {
         }else if (handle->buttons[2]->pressed) {
             handle->editDigit++;
             if (handle->editDigit > handle->current->var->maxDigit) {
-                handle->editDigit = handle->current->var->minDigit;
+                handle->editDigit = -handle->current->var->decimals;
             }
             handle->editValue = 1.0f;
             for (uint8_t i = 0; i < handle->editDigit; i++) {
