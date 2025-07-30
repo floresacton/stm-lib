@@ -6,20 +6,21 @@
 
 struct Tach_Handle {
     // configuration
-    uint32_t countFreq; // freq of Tach_Count
+    uint32_t tick_freq; // freq of Tach_Count
 
-    uint8_t spokes;
-    uint16_t maxRpm;
+    uint8_t ppr;
+    uint16_t max_rpm;
 
     // internal
     uint16_t rpm;
 
-    uint32_t count;
-    uint32_t countAccum;
-    uint32_t passes;
+    uint32_t ticks;
 
-    uint32_t checkpointAccum;
-    uint32_t checkpointPasses;
+    uint32_t tick_total;
+    uint32_t pulses;
+
+    uint32_t tick_checkpoint;
+    uint32_t rotations;
 };
 
 void Tach_Init(struct Tach_Handle* handle);
@@ -28,8 +29,8 @@ void Tach_Init(struct Tach_Handle* handle);
 void Tach_Update(struct Tach_Handle* handle);
 
 // 50kHz typical
-void Tach_Count(struct Tach_Handle* handle);
+void Tach_Tick(struct Tach_Handle* handle);
 
-void Tach_Trigger(struct Tach_Handle* handle);
+void Tach_Pulse(struct Tach_Handle* handle);
 
 #endif
