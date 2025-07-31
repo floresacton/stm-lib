@@ -10,12 +10,20 @@ void Tach_Init(struct Tach_Handle* handle) {
     
     handle->tick_checkpoint = 0;
     handle->rotations = 0;
+
+    Tach_Config(handle);
+}
+
+void Tach_Config(struct Tach_Handle* handle) {
+    handle->ticks_per_min = handle->tick_freq * 60;
+
+    const uint32_t pulses_per_min = handle->ppr * handle->max_rpm;
+    handle->ticks_per_pulse = handle->ticks_per_min / pulses_per_min;
 }
 
 void Tach_Update(struct Tach_Handle* handle) {
-    const uint32_t ticks_per_min = handle->tick_freq * 60; // 3,000,000
     if (handle->rotations) {
-        const uint32_t ticks_rotations_per_min = ticks_per_min * handle->rotations;
+        const uint32_t ticks_rotations_per_min = handle->ticks_per_min * handle->rotations;
 
         handle->rpm = ticks_rotations_per_min / handle->tick_checkpoint;
         
@@ -25,7 +33,7 @@ void Tach_Update(struct Tach_Handle* handle) {
         handle->pulses = 0;
         handle->tick_total = 0;
     }else if (handle->pulses) {
-        const uint32_t ticks_pulses_per_min = ticks_per_min * handle->pulses; // up to 90,000,000
+        const uint32_t ticks_pulses_per_min = handle->ticks_per_min * handle->pulses; // up to 90,000,000
         const uint32_t ticks_pulses_per_rotation = handle->tick_total * handle->ppr;
 
         handle->rpm = ticks_pulses_per_min / ticks_pulses_per_rotation;
@@ -34,7 +42,7 @@ void Tach_Update(struct Tach_Handle* handle) {
         handle->tick_total = 0;
     }else {
         const uint32_t ticks_pulses_per_rotation = handle->ticks * handle->ppr;
-        const uint32_t rotations_per_min_pulse = ticks_per_min / ticks_pulses_per_rotation;
+        const uint32_t rotations_per_min_pulse = handle->ticks_per_min / ticks_pulses_per_rotation;
         
         // pulse implicitly = 1
         const uint32_t new_rpm = rotations_per_min_pulse;
@@ -49,12 +57,8 @@ void Tach_Tick(struct Tach_Handle* handle) {
 }
 
 void Tach_Pulse(struct Tach_Handle* handle) {
-    const uint32_t ticks_per_min = handle->tick_freq * 60;
-    const uint32_t pulses_per_min = handle->ppr * handle->max_rpm;
-    const uint32_t ticks_per_pulse = ticks_per_min / pulses_per_min;
-    
     // pulse implicity = 1
-    if (handle->ticks >= ticks_per_pulse) {
+    if (handle->ticks >= handle->ticks_per_pulse) {
         handle->tick_total += handle->ticks;
         handle->pulses++;
         if (handle->pulses % handle->ppr == 0) {

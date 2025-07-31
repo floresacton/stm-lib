@@ -178,6 +178,7 @@ void Display_Update(struct Display_Handle* handle) {
             display_update_edit(handle);
         }else if (handle->buttons[3]->pressed) {
             Memory_Save(handle->memory, handle->current->var);
+            (*handle->values_update)();
             handle->stackIndex--;
             display_init_screen(handle);
         }else{

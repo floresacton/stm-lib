@@ -44,6 +44,8 @@ struct Display_Handle {
 
     uint8_t chars;
 
+    void (*values_update)(void);
+
     // internal
     uint8_t stackIndex;
     struct Display_Screen **stack;

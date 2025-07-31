@@ -11,6 +11,10 @@ struct Tach_Handle {
     uint8_t ppr;
     uint16_t max_rpm;
 
+    // calculated
+    uint32_t ticks_per_min;
+    uint32_t ticks_per_pulse; 
+    
     // internal
     uint16_t rpm;
 
@@ -25,7 +29,9 @@ struct Tach_Handle {
 
 void Tach_Init(struct Tach_Handle* handle);
 
-// 50Hz typical
+void Tach_Config(struct Tach_Handle* handle);
+
+// 10-50Hz typical
 void Tach_Update(struct Tach_Handle* handle);
 
 // 50kHz typical
